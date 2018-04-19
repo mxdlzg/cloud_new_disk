@@ -7,7 +7,6 @@ class Root extends React.Component {
         return (
             <div>
                 <Navigation/>
-                <Main/>
             </div>
         );
     }

@@ -19,9 +19,10 @@ import {Drawer} from "material-ui";
 import Divider from "material-ui/es/Divider/Divider";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { mailFolderListItems, otherMailFolderListItems } from './drawerData';
+import {mailFolderListItems, otherMailFolderListItems} from './drawerData';
 import List from 'material-ui/List';
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
+import Main from "../body/Main";
 
 const primary1 = red[500]; // #F44336
 const accent1 = purple['A200']; // #E040FB
@@ -31,7 +32,7 @@ const drawerWidth = 240;
 const styles = theme => ({
     root: {
         flexGrow: 1,
-        height: 430,
+        height:600,
         zIndex: 1,
         overflow: 'hidden',
         position: 'relative',
@@ -39,6 +40,7 @@ const styles = theme => ({
     },
     flex: {
         flex: 1,
+        color:'#a0a0a0'
     },
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
@@ -92,10 +94,8 @@ const styles = theme => ({
     content: {
         flexGrow: 1,
         backgroundColor: theme.palette.background.default,
-        padding: theme.spacing.unit * 3,
     },
 });
-
 
 
 class Navigation extends Component {
@@ -103,6 +103,7 @@ class Navigation extends Component {
         open: false,
         auth: true,
         anchorEl: null,
+        canOpenDrawer: false
     };
 
     handleDrawerOpen = () => {
@@ -114,7 +115,7 @@ class Navigation extends Component {
     };
 
     handleChange = (event, checked) => {
-        this.setState({auth: checked});
+        this.setState({canOpenDrawer: checked});
     };
 
     handleMenu = event => {
@@ -127,42 +128,36 @@ class Navigation extends Component {
 
     render() {
         const {classes} = this.props;
-        const {auth, anchorEl} = this.state;
+        const {auth, anchorEl, canOpenDrawer} = this.state;
         const open = Boolean(anchorEl);
         const {theme} = this.props;
 
         return (
             <div className={classes.root}>
-                {/*<FormGroup>*/}
-                {/*<FormControlLabel*/}
-                {/*control={*/}
-                {/*<Switch checked={auth} onChange={this.handleChange} aria-label="LoginSwitch" />*/}
-                {/*}*/}
-                {/*label={auth ? 'Logout' : 'Login'}*/}
-                {/*/>*/}
-                {/*</FormGroup>*/}
                 <AppBar position="absolute" color="primary"
-                        elevation={0}
+                        elevation={3}
                         className={classNames(classes.appBar, this.state.open && classes.appBarShift)}>
                     <Toolbar>
-                        <IconButton color="inherit" aria-label="open drawer" onClick={this.handleDrawerOpen}
-                                    className={classNames(classes.menuButton, this.state.open && classes.hide)}>
-                            <MenuIcon/>
-                        </IconButton>
-                        <header>
-                            <nav>
-                                <ul>
-                                    <li><Link to='/'>Home</Link></li>
-                                    <li><Link to='/login'>Login</Link></li>
-                                    <li><Link to='/detail'>Detail</Link></li>
-                                    <li><Link to={{pathname:'/detail/mxdlzg'}}>User Detail</Link></li>
-                                </ul>
-                            </nav>
-                        </header>
-                        <Typography variant="title" color="inherit" className={classes.flex}>
+                        {canOpenDrawer && (
+                            <IconButton color="inherit" aria-label="open drawer" onClick={this.handleDrawerOpen}
+                                        className={classNames(classes.menuButton, this.state.open && classes.hide)}>
+                                <MenuIcon/>
+                            </IconButton>
+                        )}
+                        {/*<header>*/}
+                            {/*<nav>*/}
+                                {/*<ul>*/}
+                                    {/*<li><Link to='/'>Login</Link></li>*/}
+                                    {/*<li><Link to='/home'>Home</Link></li>*/}
+                                    {/*<li><Link to='/detail'>Detail</Link></li>*/}
+                                    {/*<li><Link to={{pathname: '/detail/mxdlzg'}}>User Detail</Link></li>*/}
+                                {/*</ul>*/}
+                            {/*</nav>*/}
+                        {/*</header>*/}
+                        <Typography align="center" variant="title" color="inherit" className={classes.flex}>
                             CloudDisk
                         </Typography>
-                        {auth && (
+                        {canOpenDrawer && (
                             <div>
                                 <IconButton
                                     aria-owns={open ? 'menu-appbar' : null}
@@ -193,22 +188,24 @@ class Navigation extends Component {
                         )}
                     </Toolbar>
                 </AppBar>
-                <Drawer variant="permanent"
-                        classes={{paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose)}}
-                        open={this.state.open}>
-                    <div className={classes.toolbar}>
-                        <IconButton onClick={this.handleDrawerClose}>
-                            {theme.direction === 'rtl'?<ChevronRightIcon/>:<ChevronLeftIcon/>}
-                        </IconButton>
-                    </div>
-                    <Divider />
-                    <List>{mailFolderListItems}</List>
-                    <Divider/>
-                    <List>{otherMailFolderListItems}</List>
-                </Drawer>
+                {canOpenDrawer && (
+                    <Drawer variant="permanent"
+                            classes={{paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose)}}
+                            open={this.state.open}>
+                        <div className={classes.toolbar}>
+                            <IconButton onClick={this.handleDrawerClose}>
+                                {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
+                            </IconButton>
+                        </div>
+                        <Divider/>
+                        <List>{mailFolderListItems}</List>
+                        <Divider/>
+                        <List>{otherMailFolderListItems}</List>
+                    </Drawer>
+                )}
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
-                    <Typography noWrap>{'You think water moves fast? You should see ice.'}</Typography>
+                    <Main/>
                 </main>
             </div>
         );

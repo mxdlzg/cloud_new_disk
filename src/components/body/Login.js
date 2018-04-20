@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
-import logo from '../../logo.svg';
+import { BrowserRouter } from 'react-router-dom'
 import 'typeface-roboto'
+import './Login.css'
+import logo from '../../logo.svg';
 import PropTypes from 'prop-types';
 import {withStyles} from 'material-ui/styles';
 import AppBar from 'material-ui/AppBar';
@@ -15,42 +17,83 @@ import Menu, {MenuItem} from 'material-ui/Menu';
 import classNames from 'classnames';
 import purple from 'material-ui/colors/purple';
 import red from 'material-ui/colors/red';
-import {Drawer} from "material-ui";
+import {Drawer, FormControl, Grid, Input, InputAdornment, InputLabel, Paper, TextField} from "material-ui";
 import Divider from "material-ui/es/Divider/Divider";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import List from 'material-ui/List';
 import {Link} from 'react-router-dom'
 import Main from "../body/Main";
+import {Button} from 'material-ui'
+import {Visibility, VisibilityOff} from "@material-ui/icons/es/index";
 
-const styles = theme => ({
-    bg: {
-        flexGrow: 1,
-        height: '100%',
-        zIndex: 1,
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        backgroundColor:'grey'
-    },
-});
-
-const bg = {
-    flexGrow: 1,
-    height: 600,
-    zIndex: 1,
-    overflow: 'hidden',
-    position: 'relative',
-    display: 'flex',
-    backgroundColor:'#f0f0f0'
-};
 
 class Login extends React.Component {
+    state = {
+        amount: '',
+        password: '',
+        weight: '',
+        weightRange: '',
+        showPassword: false,
+    };
+
+    handleChange = prop => event => {
+        this.setState({ [prop]: event.target.value });
+    };
+
+    handleMouseDownPassword = event => {
+        event.preventDefault();
+    };
+
+    handleClickShowPassword = () => {
+        this.setState({ showPassword: !this.state.showPassword });
+    };
+
+    handleLogin = event=>{
+        this.props.history.push('/home');
+    };
+
     render() {
-        const {classes} = styles;
+        const { classes } = this.props;
+
         return (
-            <div style={bg}>
-                <h1>This is Login Page!!!</h1>
+            <div className="Login-bg">
+                    <Paper className="Login-panel" elevation={4}>
+                        <img src={logo} className="Login-logo" alt="logo" />
+                        <div>
+                            <TextField
+                                className="Login-input"
+                                id="name"
+                                label="Name"
+                                value={this.state.name}
+                                onChange={this.handleChange('name')}
+                                margin="normal"
+                            />
+                        </div>
+                        <div>
+                            <FormControl  className="Login-input">
+                                <InputLabel htmlFor="adornment-password">Password</InputLabel>
+                                <Input
+                                    id="adornment-password"
+                                    type={this.state.showPassword ? 'text' : 'password'}
+                                    value={this.state.password}
+                                    onChange={this.handleChange('password')}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="Toggle password visibility"
+                                                onClick={this.handleClickShowPassword}
+                                                onMouseDown={this.handleMouseDownPassword}
+                                            >
+                                                {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
+                        </div>
+                        <Button className="Login-button" onClick={this.handleLogin}>登录</Button>
+                    </Paper>
             </div>
         );
     }
@@ -61,4 +104,4 @@ Login.propTypes = {
     theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, {withTheme: true})(Login);
+export default (Login);

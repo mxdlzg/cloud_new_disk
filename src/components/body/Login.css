@@ -1,0 +1,44 @@
+.Login-bg {
+    flex-grow: 1;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    background-color: #F0F0F0;
+}
+
+.Login-panel {
+    margin: auto;
+    height: 300px;
+    width: 400px;
+    position: relative;
+    text-align: center;
+}
+
+.Login-input{
+    width: 50%;
+}
+
+.Login-button{
+    margin-top: 200px;
+}
+
+.Login-logo {
+    text-align: center;
+    animation: App-logo-spin infinite 20s linear;
+    height: 80px;
+}
+
+@keyframes App-logo-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

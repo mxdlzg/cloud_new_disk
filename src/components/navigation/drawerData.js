@@ -7,16 +7,17 @@ import SendIcon from '@material-ui/icons/Send';
 import MailIcon from '@material-ui/icons/Mail';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ReportIcon from '@material-ui/icons/Report';
+import {Link} from "react-router-dom";
 
 export const mailFolderListItems = (
     <div>
-        <ListItem button>
-            <ListItemIcon>
-                <InboxIcon />
-            </ListItemIcon>
-            <ListItemText primary="Inbox" />
-        </ListItem>
-        <ListItem button>
+            <ListItem component={({...props}) => <Link to='/home' {...props} />} button>
+                <ListItemIcon>
+                    <InboxIcon />
+                </ListItemIcon>
+                <ListItemText primary="Disk" />
+            </ListItem>
+        <ListItem component={({...props}) => <Link to='/' {...props} />} button>
             <ListItemIcon>
                 <StarIcon />
             </ListItemIcon>

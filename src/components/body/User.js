@@ -1,11 +1,6 @@
 import React from 'react'
 
 class User extends React.Component {
-    constructor(props){
-        super();
-        this.props = props;
-    }
-
     render() {
         return (
             <div>

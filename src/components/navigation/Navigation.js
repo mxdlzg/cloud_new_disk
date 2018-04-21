@@ -43,7 +43,7 @@ const styles = theme => ({
     },
     flex: {
         flex: 1,
-        color:'#a0a0a0'
+        color:'#878787'
     },
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
@@ -98,6 +98,9 @@ const styles = theme => ({
         flexGrow: 1,
         backgroundColor: theme.palette.background.default,
     },
+    menuIcon:{
+        color:'#7a7a7a'
+    }
 });
 
 
@@ -108,6 +111,18 @@ class Navigation extends Component {
         anchorEl: null,
         canOpenDrawer: false
     };
+
+    constructor(props){
+        super(props);
+
+        this.handler = this.handler.bind(this);
+    }
+
+    handler(ft) {
+        this.setState({
+            canOpenDrawer: ft
+        })
+    }
 
     handleDrawerOpen = () => {
         this.setState({open: true});
@@ -144,19 +159,9 @@ class Navigation extends Component {
                         {canOpenDrawer && (
                             <IconButton color="inherit" aria-label="open drawer" onClick={this.handleDrawerOpen}
                                         className={classNames(classes.menuButton, this.state.open && classes.hide)}>
-                                <MenuIcon/>
+                                <MenuIcon className={classNames(classes.menuIcon)}/>
                             </IconButton>
                         )}
-                        {/*<header>*/}
-                            {/*<nav>*/}
-                                {/*<ul>*/}
-                                    {/*<li><Link to='/'>Login</Link></li>*/}
-                                    {/*<li><Link to='/home'>Home</Link></li>*/}
-                                    {/*<li><Link to='/detail'>Detail</Link></li>*/}
-                                    {/*<li><Link to={{pathname: '/detail/mxdlzg'}}>User Detail</Link></li>*/}
-                                {/*</ul>*/}
-                            {/*</nav>*/}
-                        {/*</header>*/}
                         <Typography align="center" variant="title" color="inherit" className={classes.flex}>
                             CloudDisk
                         </Typography>
@@ -166,7 +171,7 @@ class Navigation extends Component {
                                     aria-owns={open ? 'menu-appbar' : null}
                                     aria-haspopup="true"
                                     onClick={this.handleMenu}
-                                    color="inherit"
+                                    color="#f0f0f0"
                                 >
                                     <AccountCircle/>
                                 </IconButton>
@@ -208,7 +213,7 @@ class Navigation extends Component {
                 )}
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
-                    <Main/>
+                    <Main handler={this.handler}/>
                 </main>
             </div>
         );

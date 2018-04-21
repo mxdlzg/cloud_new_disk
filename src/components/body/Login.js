@@ -37,6 +37,10 @@ class Login extends React.Component {
         showPassword: false,
     };
 
+    componentWillMount(){
+        //this.props.handler(false);
+    }
+
     handleChange = prop => event => {
         this.setState({ [prop]: event.target.value });
     };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import {ListItem, ListItemIcon, ListItemText} from 'material-ui/List';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import DraftsIcon from '@material-ui/icons/Drafts';
 import StarIcon from '@material-ui/icons/Star';
@@ -11,29 +11,29 @@ import {Link} from "react-router-dom";
 
 export const mailFolderListItems = (
     <div>
-            <ListItem component={({...props}) => <Link to='/home' {...props} />} button>
-                <ListItemIcon>
-                    <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Disk" />
-            </ListItem>
+        <ListItem component={({...props}) => <Link to='/home' {...props} />} button>
+            <ListItemIcon>
+                <InboxIcon/>
+            </ListItemIcon>
+            <ListItemText primary="Disk"/>
+        </ListItem>
         <ListItem component={({...props}) => <Link to='/' {...props} />} button>
             <ListItemIcon>
-                <StarIcon />
+                <StarIcon/>
             </ListItemIcon>
-            <ListItemText primary="Starred" />
+            <ListItemText primary="Starred"/>
         </ListItem>
         <ListItem button>
             <ListItemIcon>
-                <SendIcon />
+                <SendIcon/>
             </ListItemIcon>
-            <ListItemText primary="Send mail" />
+            <ListItemText primary="Send mail"/>
         </ListItem>
         <ListItem button>
             <ListItemIcon>
-                <DraftsIcon />
+                <DraftsIcon/>
             </ListItemIcon>
-            <ListItemText primary="Drafts" />
+            <ListItemText primary="Drafts"/>
         </ListItem>
     </div>
 );
@@ -42,21 +42,21 @@ export const otherMailFolderListItems = (
     <div>
         <ListItem button>
             <ListItemIcon>
-                <MailIcon />
+                <MailIcon/>
             </ListItemIcon>
-            <ListItemText primary="All mail" />
+            <ListItemText primary="All mail"/>
         </ListItem>
         <ListItem button>
             <ListItemIcon>
-                <DeleteIcon />
+                <DeleteIcon/>
             </ListItemIcon>
-            <ListItemText primary="Trash" />
+            <ListItemText primary="Trash"/>
         </ListItem>
         <ListItem button>
             <ListItemIcon>
-                <ReportIcon />
+                <ReportIcon/>
             </ListItemIcon>
-            <ListItemText primary="Spam" />
+            <ListItemText primary="Spam"/>
         </ListItem>
     </div>
 );

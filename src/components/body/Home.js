@@ -1,19 +1,31 @@
 import React from 'react'
+import PropTypes from 'prop-types';
+import "./Home.css"
+import {withStyles} from 'material-ui/styles';
+import HomeTree from "./HomeTree";
 
+const styles = theme => ({
 
-class Home extends React.Component{
-    constructor(props){
+});
+
+class Home extends React.Component {
+    constructor(props) {
         super(props);
         this.props.handler(true);
     }
 
-    render(){
-        return(
+    render() {
+        const {classes} = this.props;
+        return (
             <div>
-                <h2>This is a Home page!</h2>
+                <HomeTree/>
             </div>
         );
     }
 }
 
-export default Home;
+Home.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles, {withTheme: true})(Home);

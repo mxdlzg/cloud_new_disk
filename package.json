@@ -10,6 +10,7 @@
   "dependencies": {
     "@material-ui/icons": "^1.0.0-beta.42",
     "classnames": "latest",
+    "immutable": "^3.8.2",
     "jquery": "^3.3.1",
     "material-ui": "^1.0.0-beta.42",
     "material-ui-tree": "^1.0.7",

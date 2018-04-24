@@ -5,3 +5,11 @@
 .tree-view-item{
 
 }
+
+.collapseIndent{
+    margin-left: 55px;
+}
+
+.noneExpand{
+    visibility:hidden
+}

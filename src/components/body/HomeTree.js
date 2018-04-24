@@ -17,6 +17,11 @@ import InsertDriveFileIcon from '@material-ui/icons//InsertDriveFile';
 import AddIcon from '@material-ui/icons//Add';
 import DeleteIcon from '@material-ui/icons//Delete';
 import $ from 'jquery';
+import {Map as ImMap} from 'immutable'
+import {List as ImList} from 'immutable'
+import classNames from "classnames";
+import {fromJS} from 'immutable'
+import Immutable from 'immutable'
 
 const styles = theme => ({
     root: {
@@ -37,42 +42,140 @@ const styles = theme => ({
             },
         },
     },
+
 });
 
-class HomeTree extends React.Component {
-    state = {open: true};
+class HomeTreeNode extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            AppValue: this.props.items       //ImMap
+        };
+        this.handleClick = this.handleClick.bind(this);
+    }
 
-    handleClick = () => {
-        this.setState({open: !this.state.open});
+    loadInner = () => {
+
     };
+
+    handleClick = (path, event) => {
+        // console.log(path);
+
+        let pathArr = path.trim().split(' ');
+
+        // console.log(pathArr);
+
+        let aim = this.state.AppValue.getIn(pathArr).toJS();
+        // console.log(aim);
+        if (aim.hasChild) {
+            //TODO::加载Loading界面
+            const newData = this.state.AppValue.updateIn(pathArr, value => {
+                // console.log(value);
+                let tp = value.toJS();
+                tp.open = !tp.open;
+                return fromJS(tp);
+            });
+            //TODO::进行Ajax请求
+            this.setState({AppValue: newData})
+        } else {
+            //TODO::进行Ajax请求,获取此文件夹内的详细文件列表，并显示在sibling的组件里面
+        }
+    };
+
+    renderChildren(items,keyPath) {
+        let self = this;
+
+        const nodes = items.keySeq().map((key, index) => {
+            let item = items.get(key).toJS();
+            // if (key === '3') {
+            //     console.log(item);
+            //     console.log(item.children);
+            // }
+            return (
+                <List key={index} component="div" disablePadding>
+                    <ListItem button onClick={(event) => self.handleClick(keyPath+key, event)}>
+                        {item.hasChild>0 ? item.open ? <ExpandLess/> : <ExpandMore/> :
+                            <ExpandMore className="noneExpand"/>}
+                        <ListItemIcon>
+                            <FolderIcon/>
+                        </ListItemIcon>
+                        <ListItemText inset primary={item.name}/>
+                    </ListItem>
+                    <Collapse className="collapseIndent" in={item.open} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding>
+                            {this.renderChildren(fromJS(item.children),keyPath+key+' children ')}
+                        </List>
+                    </Collapse>
+                </List>
+            )
+        });
+        return nodes;
+    }
+
+    render() {
+        return (
+            <div>
+                {this.renderChildren(this.state.AppValue,'')}
+            </div>
+        );
+    }
+}
+
+export {HomeTreeNode};
+
+class HomeTree extends React.Component {
+    state = {};
+
+    //获取首层数据
+    static initData() {
+        //TODO:: Ajax
+        return fromJS({
+            '1':{
+                'name': '1',
+                'hasChild':false,
+                'children': {},
+                'open': true
+            },
+            '2':{
+                'name': '2',
+                'hasChild':false,
+                'children': {},
+                'open': false
+            },
+            '3':{
+                'name': '3',
+                'hasChild':true,
+                'children': {
+                    '1': {
+                        'name': '4',
+                        'hasChild':false,
+                        'children': {},
+                        'open': false
+                    }
+                },
+                'open': false
+            }
+        });
+    }
 
     render() {
         const {classes} = this.props;
         return (
             <div className={classes.root}>
-                <ListItem button onClick={this.handleClick}>
-                    <ListItemIcon>
-                        <FolderIcon />
-                    </ListItemIcon>
-                    <ListItemText inset primary="Inbox" />
-                    {this.state.open ? <ExpandLess /> : <ExpandMore />}
-                </ListItem>
-                <Collapse in={this.state.open} timeout="auto" unmountOnExit>
-                        <ListItem button className={classes.nested}>
-                            <ListItemIcon>
-                                <InsertDriveFileIcon />
-                            </ListItemIcon>
-                            <ListItemText inset primary="Starred" />
-                        </ListItem>
-                </Collapse>
+                <HomeTreeNode items={HomeTree.initData()}/>
             </div>
         );
     }
 
 }
 
+HomeTree.defaultProps = {
+    url: "www.baidu.com"
+};
+
 HomeTree.propTypes = {
     classes: PropTypes.object.isRequired,
+    url: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles, {withTheme: true})(HomeTree);

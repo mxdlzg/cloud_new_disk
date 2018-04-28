@@ -11,3 +11,12 @@
     display: flex;
     background-color: #FaFaFa;
 }
+
+.Home-right{
+    width: 100%;
+    background-color: #222222;
+}
+
+.Home-left{
+    float: left;
+}

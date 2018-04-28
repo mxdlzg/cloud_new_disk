@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import "./Home.css"
 import {withStyles} from 'material-ui/styles';
 import HomeTree from "./HomeTree";
+import Detail from "./Detail";
+import DetailGridView from "./DetailGridView";
 
 const styles = theme => ({
 
@@ -18,7 +20,8 @@ class Home extends React.Component {
         const {classes} = this.props;
         return (
             <div>
-                <HomeTree/>
+                <HomeTree className="Home-left"/>
+                <DetailGridView />
             </div>
         );
     }

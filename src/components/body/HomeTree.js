@@ -2,7 +2,7 @@ import React from 'react'
 import {withStyles} from "material-ui/styles/index";
 import PropTypes from "prop-types";
 import "./HomeTree.css"
-import {Collapse, List, ListItem, ListItemIcon, ListItemText, ListSubheader} from "material-ui";
+import {Button, Collapse, List, ListItem, ListItemIcon, ListItemText, ListSubheader} from "material-ui";
 import {ExpandLess, ExpandMore, StarBorder} from "@material-ui/icons/es/index";
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import DraftsIcon from '@material-ui/icons/Drafts';
@@ -26,11 +26,12 @@ import Immutable from 'immutable'
 
 const styles = theme => ({
     root: {
+        float:'left',
         width: '100%',
         height: $(document).height() - 64,
         maxWidth: 260,
         overflow: 'auto',
-        backgroundColor: "#fff",//theme.palette.background.paper,
+        backgroundColor: "transparent",//theme.palette.background.paper,
     },
     nested: {
         paddingLeft: theme.spacing.unit * 4,
@@ -43,7 +44,10 @@ const styles = theme => ({
             },
         },
     },
-
+    newBtn:{
+        marginLeft:60,
+        marginTop:10
+    }
 });
 
 class HomeTreeNode extends React.Component {
@@ -177,6 +181,7 @@ class HomeTree extends React.Component {
         const {classes} = this.props;
         return (
             <div className={classes.root}>
+                <Button variant="raised" color="secondary" className={classes.newBtn}>New</Button>
                 <HomeTreeNode items={HomeTree.initData()}/>
             </div>
         );

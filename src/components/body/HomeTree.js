@@ -16,6 +16,7 @@ import DescriptionIcon from '@material-ui/icons//Description';
 import InsertDriveFileIcon from '@material-ui/icons//InsertDriveFile';
 import AddIcon from '@material-ui/icons//Add';
 import DeleteIcon from '@material-ui/icons//Delete';
+import {ArrowDropDown,ArrowDropUp} from '@material-ui/icons'
 import $ from 'jquery';
 import {Map as ImMap} from 'immutable'
 import {List as ImList} from 'immutable'
@@ -94,7 +95,7 @@ class HomeTreeNode extends React.Component {
             return (
                 <List key={index} component="div" disablePadding>
                     <ListItem button onClick={(event) => self.handleClick(keyPath+key, event)}>
-                        {item.hasChild>0 ? item.open ? <ExpandLess/> : <ExpandMore/> :
+                        {item.hasChild>0 ? item.open ? <ArrowDropUp color="disabled"/> : <ArrowDropDown color="disabled"/> :
                             <ExpandMore className="noneExpand"/>}
                         <ListItemIcon>
                             <FolderIcon/>
@@ -148,8 +149,22 @@ class HomeTree extends React.Component {
                 'children': {
                     '1': {
                         'name': '4',
-                        'hasChild':false,
-                        'children': {},
+                        'hasChild':true,
+                        'children': {
+                            '5':{
+                                'name': '2',
+                                'hasChild':true,
+                                'children': {
+                                    '1':{
+                                        'name': '88',
+                                        'hasChild':false,
+                                        'children': {},
+                                        'open': false
+                                    }
+                                },
+                                'open': false
+                            }
+                        },
                         'open': false
                     }
                 },

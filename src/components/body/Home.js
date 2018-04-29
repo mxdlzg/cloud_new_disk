@@ -4,7 +4,8 @@ import "./Home.css"
 import {withStyles} from 'material-ui/styles';
 import HomeTree from "./HomeTree";
 import Detail from "./Detail";
-import DetailGridView from "./DetailGridView";
+import EnhancedTable from "./DetailListView";
+import FileDetail from "./FileDetail";
 
 const styles = theme => ({
 
@@ -21,7 +22,8 @@ class Home extends React.Component {
         return (
             <div>
                 <HomeTree className="Home-left"/>
-                <DetailGridView />
+                <EnhancedTable />
+                <FileDetail/>
             </div>
         );
     }

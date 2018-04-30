@@ -6,9 +6,12 @@ import {mailFolderListItems, otherMailFolderListItems} from "../navigation/drawe
 
 const styles = theme => ({
     root: {
+        float:'right',
+        width:'30%',
+        position:'relative',
         height: $(document).height() - 64,
         overflow: 'auto',
-        backgroundColor: "#d9d9d9",//theme.palette.background.paper,
+        backgroundColor: "#ffffff",//theme.palette.background.paper,
     },
     list: {
         width: 250,

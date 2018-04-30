@@ -8,7 +8,16 @@ import EnhancedTable from "./DetailListView";
 import FileDetail from "./FileDetail";
 
 const styles = theme => ({
-
+    root:{
+        display:'flex'
+    },
+    tree:{
+        flex:'none'
+    },
+    main:{
+        float:'left',
+        flex:1
+    }
 });
 
 class Home extends React.Component {
@@ -20,10 +29,12 @@ class Home extends React.Component {
     render() {
         const {classes} = this.props;
         return (
-            <div>
-                <HomeTree className="Home-left"/>
-                <EnhancedTable />
-                <FileDetail/>
+            <div className={classes.root}>
+                <HomeTree className={classes.tree}/>
+                <div className={classes.main}>
+                    <EnhancedTable />
+                    <FileDetail/>
+                </div>
             </div>
         );
     }

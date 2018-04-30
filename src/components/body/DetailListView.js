@@ -22,7 +22,9 @@ import {
 
 const styles = theme => ({
     root: {
-        marginLeft: 260,
+        float:'left',
+        width:'70%',
+        // marginLeft: 260,
         height: $(document).height() - 64,
         overflow: 'auto',
         backgroundColor: "#fff",//theme.palette.background.paper,

@@ -54,7 +54,7 @@ let counter = 0;
 
 function createData(iconUrl, name, calories, fat, carbs, protein) {
     counter += 1;
-    return {id: counter,iconUrl, name, calories, fat, carbs, protein};
+    return {id: counter, iconUrl, name, calories, fat, carbs, protein};
 }
 
 const columnData = [
@@ -76,13 +76,6 @@ class EnhancedTableHead extends React.Component {
         return (
             <TableHead>
                 <TableRow>
-                    <TableCell padding="checkbox">
-                        <Checkbox
-                            indeterminate={numSelected > 0 && numSelected < rowCount}
-                            checked={numSelected === rowCount}
-                            onChange={onSelectAllClick}
-                        />
-                    </TableCell>
                     {columnData.map(column => {
                         return (
                             <TableCell
@@ -151,10 +144,10 @@ const toolbarStyles = theme => ({
     iconSmall: {
         fontSize: 16,
     },
-    button:{
-        marginLeft:5
+    button: {
+        marginLeft: 5
     },
-    fileIcon:{
+    fileIcon: {
         width: 30,
         height: 30,
     }
@@ -163,38 +156,39 @@ const toolbarStyles = theme => ({
 class EnhancedTableToolbar extends React.Component {
     state = {
         anchorEl: null,
+        allSelected:false
     };
 
     handleClick = event => {
-        this.setState({ anchorEl: event.currentTarget });
+        this.setState({anchorEl: event.currentTarget});
     };
 
     handleClose = () => {
-        this.setState({ anchorEl: null });
+        this.setState({anchorEl: null});
     };
 
     render() {
-        const {numSelected, classes} = this.props;
-        const { anchorEl } = this.state;
+        const {onSelectAllClick, numSelected, rowCount, classes} = this.props;
+        const {anchorEl,allSelected} = this.state;
 
         return (
             <Toolbar className={classNames(classes.root, {[classes.highlight]: numSelected > 0,})}>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
-                    <FileUpload className={classNames(classes.iconSmall)} />
+                    <FileUpload className={classNames(classes.iconSmall)}/>
                     上 传
                 </Button>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
-                    <FolderIcon className={classNames(classes.iconSmall)} />
+                    <FolderIcon className={classNames(classes.iconSmall)}/>
                     新建文件夹
                 </Button>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
-                    <CloudDownloadIcon className={classNames(classes.iconSmall)} />
+                    <CloudDownloadIcon className={classNames(classes.iconSmall)}/>
                     下载
                 </Button>
                 <div className={classes.spacer}/>
                 <Tooltip title="全选">
-                    <IconButton aria-label="全选">
-                        <SelectAllIcon color="secondary"/>
+                    <IconButton aria-label="全选" onClick={onSelectAllClick}>
+                        <SelectAllIcon color={numSelected === rowCount ? "secondary" : "default"}/>
                     </IconButton>
                 </Tooltip>
                 <div className={classes.actions}>
@@ -235,25 +229,26 @@ class EnhancedTable extends React.Component {
         this.state = {
             order: 'asc',
             orderBy: 'calories',
+            allSelected:true,
             selected: [],
             data: [
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Cupcake', 305, 3.7, 67, 4.3),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Donut', 452, 25.0, 51, 4.9),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Eclair', 262, 16.0, 24, 6.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Frozen yoghurt', 159, 6.0, 24, 4.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Gingerbread', 356, 16.0, 49, 3.9),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Honeycomb', 408, 3.2, 87, 6.5),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Ice cream sandwich', 237, 9.0, 37, 4.3),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Jelly Bean', 375, 0.0, 94, 0.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','KitKat', 518, 26.0, 65, 7.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Lollipop', 392, 0.2, 98, 0.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Marshmallow', 318, 0, 81, 2.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Nougat', 360, 19.0, 9, 37.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Oreo', 437, 18.0, 63, 4.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Cupcake', 305, 3.7, 67, 4.3),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Donut', 452, 25.0, 51, 4.9),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Eclair', 262, 16.0, 24, 6.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Frozen yoghurt', 159, 6.0, 24, 4.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Gingerbread', 356, 16.0, 49, 3.9),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Honeycomb', 408, 3.2, 87, 6.5),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Ice cream sandwich', 237, 9.0, 37, 4.3),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Jelly Bean', 375, 0.0, 94, 0.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'KitKat', 518, 26.0, 65, 7.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Lollipop', 392, 0.2, 98, 0.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Marshmallow', 318, 0, 81, 2.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Nougat', 360, 19.0, 9, 37.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Oreo', 437, 18.0, 63, 4.0),
             ].sort((a, b) => (a.calories < b.calories ? -1 : 1)),
             page: 0,
             rowsPerPage: 25,
-            rowHeight:40,
+            rowHeight: 40,
         };
     }
 
@@ -274,7 +269,18 @@ class EnhancedTable extends React.Component {
     };
 
     handleSelectAllClick = (event, checked) => {
+        this.setState({allSelected:checked});
         if (checked) {
+            this.setState({selected: this.state.data.map(n => n.id)});
+            return;
+        }
+        this.setState({selected: []});
+    };
+
+    handleSelectAll = () => {
+        const {allSelected} = this.state;
+        this.setState({allSelected:!allSelected});
+        if (allSelected) {
             this.setState({selected: this.state.data.map(n => n.id)});
             return;
         }
@@ -319,7 +325,8 @@ class EnhancedTable extends React.Component {
 
         return (
             <Paper className={classes.root} elevation={6}>
-                <EnhancedTableToolbar numSelected={selected.length}/>
+                <EnhancedTableToolbar onSelectAllClick={this.handleSelectAll} rowCount={data.length}
+                                      numSelected={selected.length}/>
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table}>
                         <EnhancedTableHead
@@ -343,9 +350,7 @@ class EnhancedTable extends React.Component {
                                         key={n.id}
                                         selected={isSelected}
                                     >
-                                        <TableCell padding="checkbox">
-                                            <Checkbox checked={isSelected}/>
-                                        </TableCell>
+
                                         <TableCell>
                                             <img height={rowHeight} width={rowHeight} src={n.iconUrl}/>
                                         </TableCell>

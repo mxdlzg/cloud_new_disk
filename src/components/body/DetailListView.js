@@ -8,7 +8,11 @@ import {lighten} from 'material-ui/styles/colorManipulator';
 import classNames from 'classnames';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
+import SelectAllIcon from '@material-ui/icons/SelectAll'
+import FolderIcon from '@material-ui/icons//Folder';
+
 import {
+    Button,
     Checkbox,
     IconButton, Table, TableBody,
     TableCell,
@@ -19,11 +23,12 @@ import {
     Toolbar,
     Tooltip
 } from "material-ui";
+import {FileUpload} from "@material-ui/icons/es/index";
 
 const styles = theme => ({
     root: {
-        float:'left',
-        width:'70%',
+        float: 'left',
+        width: '70%',
         // marginLeft: 260,
         height: $(document).height() - 64,
         overflow: 'auto',
@@ -37,8 +42,7 @@ const styles = theme => ({
         width: '100%',
         marginTop: theme.spacing.unit * 3,
     },
-    table: {
-    },
+    table: {},
     tableWrapper: {
         overflowX: 'auto',
     },
@@ -140,17 +144,27 @@ const toolbarStyles = theme => ({
     title: {
         flex: '0 0 auto',
     },
+    iconSmall: {
+        fontSize: 16,
+    },
+    button:{
+        flex: '1 1 auto',
+    }
 });
 
 class EnhancedTableToolbar extends React.Component {
     render() {
         const {numSelected, classes} = this.props;
         return (
-            <Toolbar
-                className={classNames(classes.root, {
-                    [classes.highlight]: numSelected > 0,
-                })}
-            >
+            <Toolbar className={classNames(classes.root, {[classes.highlight]: numSelected > 0,})}>
+                <Button className={classes.button} variant="raised" size="small" color="secondary">
+                    <FileUpload className={classNames(classes.iconSmall)} />
+                    上 传
+                </Button>
+                <Button className={classes.button} variant="raised" size="small" color="secondary">
+                    <FolderIcon className={classNames(classes.iconSmall)} />
+                    新建文件夹
+                </Button>
                 <div className={classes.title}>
                     {numSelected > 0 ? (
                         <Typography color="inherit" variant="subheading">
@@ -161,6 +175,11 @@ class EnhancedTableToolbar extends React.Component {
                     )}
                 </div>
                 <div className={classes.spacer}/>
+                <Tooltip title="全选">
+                    <IconButton aria-label="全选">
+                        <SelectAllIcon color="secondary"/>
+                    </IconButton>
+                </Tooltip>
                 <div className={classes.actions}>
                     {numSelected > 0 ? (
                         <Tooltip title="Delete">

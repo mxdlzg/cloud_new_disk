@@ -247,7 +247,7 @@ class EnhancedTable extends React.Component {
                 createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Oreo', 437, 18.0, 63, 4.0),
             ].sort((a, b) => (a.calories < b.calories ? -1 : 1)),
             page: 0,
-            rowsPerPage: 25,
+            rowsPerPage: 20,
             rowHeight: 40,
         };
     }
@@ -320,7 +320,8 @@ class EnhancedTable extends React.Component {
 
     render() {
         const {classes} = this.props;
-        const {data, order, orderBy, selected, rowsPerPage, page, rowHeight} = this.state;
+        const {data, order, orderBy, selected, page, rowHeight} = this.state;
+        let rowsPerPage = data.length;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
         return (

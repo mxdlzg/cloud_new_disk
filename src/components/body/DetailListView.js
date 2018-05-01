@@ -10,11 +10,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import SelectAllIcon from '@material-ui/icons/SelectAll'
 import FolderIcon from '@material-ui/icons//Folder';
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
 
 import {
+    Avatar,
     Button,
     Checkbox,
-    IconButton, Table, TableBody,
+    IconButton, Menu, MenuItem, Table, TableBody,
     TableCell,
     TableHead,
     TablePagination,
@@ -50,17 +52,17 @@ const styles = theme => ({
 
 let counter = 0;
 
-function createData(name, calories, fat, carbs, protein) {
+function createData(iconUrl, name, calories, fat, carbs, protein) {
     counter += 1;
-    return {id: counter, name, calories, fat, carbs, protein};
+    return {id: counter,iconUrl, name, calories, fat, carbs, protein};
 }
 
 const columnData = [
-    {id: 'name', numeric: false, disablePadding: true, label: 'Dessert (100g serving)'},
-    {id: 'calories', numeric: true, disablePadding: false, label: 'Calories'},
-    {id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)'},
-    {id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)'},
-    {id: 'protein', numeric: true, disablePadding: false, label: 'Protein (g)'},
+    {id: 'iconUrl', numeric: false, disablePadding: false, label: '图标'},
+    {id: 'name', numeric: false, disablePadding: true, label: '名称'},
+    {id: 'calories', numeric: true, disablePadding: false, label: '类型'},
+    {id: 'fat', numeric: true, disablePadding: false, label: '大小'},
+    {id: 'carbs', numeric: true, disablePadding: false, label: '修改时间'},
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -90,7 +92,7 @@ class EnhancedTableHead extends React.Component {
                                 sortDirection={orderBy === column.id ? order : false}
                             >
                                 <Tooltip
-                                    title="Sort"
+                                    title="排序"
                                     placement={column.numeric ? 'bottom-end' : 'bottom-start'}
                                     enterDelay={300}
                                 >
@@ -124,6 +126,8 @@ EnhancedTableHead.propTypes = {
 const toolbarStyles = theme => ({
     root: {
         paddingRight: theme.spacing.unit,
+        color: theme.palette.secondary.main,
+        backgroundColor: theme.palette.secondary.light_grey
     },
     highlight:
         theme.palette.type === 'light'
@@ -136,7 +140,7 @@ const toolbarStyles = theme => ({
                 backgroundColor: theme.palette.secondary.dark,
             },
     spacer: {
-        flex: '1 1 100%',
+        flex: '1 1 auto',
     },
     actions: {
         color: theme.palette.text.secondary,
@@ -148,13 +152,31 @@ const toolbarStyles = theme => ({
         fontSize: 16,
     },
     button:{
-        flex: '1 1 auto',
+        marginLeft:5
+    },
+    fileIcon:{
+        width: 30,
+        height: 30,
     }
 });
 
 class EnhancedTableToolbar extends React.Component {
+    state = {
+        anchorEl: null,
+    };
+
+    handleClick = event => {
+        this.setState({ anchorEl: event.currentTarget });
+    };
+
+    handleClose = () => {
+        this.setState({ anchorEl: null });
+    };
+
     render() {
         const {numSelected, classes} = this.props;
+        const { anchorEl } = this.state;
+
         return (
             <Toolbar className={classNames(classes.root, {[classes.highlight]: numSelected > 0,})}>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
@@ -165,15 +187,10 @@ class EnhancedTableToolbar extends React.Component {
                     <FolderIcon className={classNames(classes.iconSmall)} />
                     新建文件夹
                 </Button>
-                <div className={classes.title}>
-                    {numSelected > 0 ? (
-                        <Typography color="inherit" variant="subheading">
-                            {numSelected} selected
-                        </Typography>
-                    ) : (
-                        <Typography variant="title">Nutrition</Typography>
-                    )}
-                </div>
+                <Button className={classes.button} variant="raised" size="small" color="secondary">
+                    <CloudDownloadIcon className={classNames(classes.iconSmall)} />
+                    下载
+                </Button>
                 <div className={classes.spacer}/>
                 <Tooltip title="全选">
                     <IconButton aria-label="全选">
@@ -181,19 +198,23 @@ class EnhancedTableToolbar extends React.Component {
                     </IconButton>
                 </Tooltip>
                 <div className={classes.actions}>
-                    {numSelected > 0 ? (
-                        <Tooltip title="Delete">
-                            <IconButton aria-label="Delete">
-                                <DeleteIcon/>
-                            </IconButton>
-                        </Tooltip>
-                    ) : (
+                    {numSelected > 0 && (
                         <Tooltip title="Filter list">
-                            <IconButton aria-label="Filter list">
+                            <IconButton aria-label="Filter list" onClick={this.handleClick}>
                                 <FilterListIcon/>
                             </IconButton>
                         </Tooltip>
                     )}
+                    <Menu
+                        id="simple-menu"
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={this.handleClose}
+                    >
+                        <MenuItem onClick={this.handleClose}>删除</MenuItem>
+                        <MenuItem onClick={this.handleClose}>移动到</MenuItem>
+                        <MenuItem onClick={this.handleClose}>复制到</MenuItem>
+                    </Menu>
                 </div>
             </Toolbar>
         )
@@ -216,22 +237,23 @@ class EnhancedTable extends React.Component {
             orderBy: 'calories',
             selected: [],
             data: [
-                createData('Cupcake', 305, 3.7, 67, 4.3),
-                createData('Donut', 452, 25.0, 51, 4.9),
-                createData('Eclair', 262, 16.0, 24, 6.0),
-                createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-                createData('Gingerbread', 356, 16.0, 49, 3.9),
-                createData('Honeycomb', 408, 3.2, 87, 6.5),
-                createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-                createData('Jelly Bean', 375, 0.0, 94, 0.0),
-                createData('KitKat', 518, 26.0, 65, 7.0),
-                createData('Lollipop', 392, 0.2, 98, 0.0),
-                createData('Marshmallow', 318, 0, 81, 2.0),
-                createData('Nougat', 360, 19.0, 9, 37.0),
-                createData('Oreo', 437, 18.0, 63, 4.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Cupcake', 305, 3.7, 67, 4.3),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Donut', 452, 25.0, 51, 4.9),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Eclair', 262, 16.0, 24, 6.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Frozen yoghurt', 159, 6.0, 24, 4.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Gingerbread', 356, 16.0, 49, 3.9),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Honeycomb', 408, 3.2, 87, 6.5),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Ice cream sandwich', 237, 9.0, 37, 4.3),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Jelly Bean', 375, 0.0, 94, 0.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','KitKat', 518, 26.0, 65, 7.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Lollipop', 392, 0.2, 98, 0.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Marshmallow', 318, 0, 81, 2.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Nougat', 360, 19.0, 9, 37.0),
+                createData('https://material-ui-next.com/static/images/uxceo-128.jpg','Oreo', 437, 18.0, 63, 4.0),
             ].sort((a, b) => (a.calories < b.calories ? -1 : 1)),
             page: 0,
-            rowsPerPage: 5,
+            rowsPerPage: 25,
+            rowHeight:40,
         };
     }
 
@@ -292,7 +314,7 @@ class EnhancedTable extends React.Component {
 
     render() {
         const {classes} = this.props;
-        const {data, order, orderBy, selected, rowsPerPage, page} = this.state;
+        const {data, order, orderBy, selected, rowsPerPage, page, rowHeight} = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
         return (
@@ -324,11 +346,13 @@ class EnhancedTable extends React.Component {
                                         <TableCell padding="checkbox">
                                             <Checkbox checked={isSelected}/>
                                         </TableCell>
+                                        <TableCell>
+                                            <img height={rowHeight} width={rowHeight} src={n.iconUrl}/>
+                                        </TableCell>
                                         <TableCell padding="none">{n.name}</TableCell>
                                         <TableCell numeric>{n.calories}</TableCell>
                                         <TableCell numeric>{n.fat}</TableCell>
                                         <TableCell numeric>{n.carbs}</TableCell>
-                                        <TableCell numeric>{n.protein}</TableCell>
                                     </TableRow>
                                 );
                             })}

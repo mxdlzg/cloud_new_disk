@@ -4,6 +4,7 @@ import Detail from "./Detail";
 import Login from "./Login";
 import Home from "./Home";
 import User from "./User"
+import Uploader from "./Uploader";
 
 
 class Main extends React.Component{
@@ -16,6 +17,7 @@ class Main extends React.Component{
                     <Route path='/home' render={()=><Home handler={this.props.handler}/>}/>
                     <Route path='/detail' component={Detail}/>
                     <Route path='/user' component={User}/>
+                    <Route path='/uploader' component={Uploader}/>
                 </Switch>
             </main>
         );

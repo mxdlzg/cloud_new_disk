@@ -64,10 +64,28 @@ const statusTextOverride = {
 class Uploader extends React.Component {
     constructor(props){
         super(props);
-        this.state={
-            open:props.open,
+        this.state = {
+            open: props.open
+        };
+        this.handleClose = this.handleClose.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.open == this.state.open) {
+            console.log("not changed")
+        }else {
+            this.setState({open:nextProps.open});
         }
     }
+
+    // shouldComponentUpdate(nextProps, nextState){
+    //     console.log(nextProps);
+    //     return true;
+    // }
+    //
+    // componentWillUpdate(nextProps, nextState){
+    //     console.log(nextProps);
+    // }
 
     handleUpload = () =>{
         uploader.methods.uploadStoredFiles();
@@ -75,10 +93,13 @@ class Uploader extends React.Component {
 
     handleClose = () =>{
         this.setState({open:false});
+        this.props.onClose();
     };
 
     render() {
         const {classes} = this.props;
+
+        //console.log("render uploader"+this.state.open);
         return (
             <div>
                 {/*<Button onClick={this.handleClickOpen}>Open form dialog</Button>*/}
@@ -86,7 +107,7 @@ class Uploader extends React.Component {
                     open={this.state.open}
                     onClose={this.handleClose}
                     aria-labelledby="form-dialog-title"
-                    disableBackdropClick={true}
+                    disableBackdropClick={false}
                     maxWidth={false}
                 >
                     <DialogTitle id="form-dialog-title">上传(Uploader)</DialogTitle>
@@ -97,7 +118,7 @@ class Uploader extends React.Component {
                         <Button onClick={this.handleUpload} color="secondary">
                             上传
                         </Button>
-                        <Button onClick={this.handleClose} color="secondary">
+                        <Button onClick={this.handleClose.bind(this)} color="secondary">
                             取消
                         </Button>
                     </DialogActions>

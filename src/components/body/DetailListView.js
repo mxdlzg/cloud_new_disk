@@ -158,7 +158,7 @@ class EnhancedTableToolbar extends React.Component {
     state = {
         anchorEl: null,
         allSelected:false,
-        uploaderDialogOpen:false,
+        open:false,
     };
 
     handleClick = event => {
@@ -170,15 +170,15 @@ class EnhancedTableToolbar extends React.Component {
     };
 
     //
-    openUploaderDialog = event =>{
-        this.setState({uploaderDialogOpen:true});
+    handleClickOpen = () => {
+        this.setState({ open: true });
     };
-    onDialogClose = () =>{
-        this.state.uploaderDialogOpen = false;
-        console.log("after close "+this.state.uploaderDialogOpen);
 
-        // this.setState({uploaderDialogOpen:false});
+    handleDialogClose = () => {
+        console.log("onClose");
+        this.setState({ open: !this.state.open });
     };
+
 
     render() {
         const {onSelectAllClick, numSelected, rowCount, classes} = this.props;
@@ -186,10 +186,10 @@ class EnhancedTableToolbar extends React.Component {
 
         return (
             <Toolbar className={classNames(classes.root, {[classes.highlight]: numSelected > 0,})}>
-                <Button onClick={this.openUploaderDialog} className={classes.button} variant="raised" size="small" color="secondary">
+                <Button onClick={this.handleClickOpen} className={classes.button} variant="raised" size="small" color="secondary">
                     <FileUpload className={classNames(classes.iconSmall)}/>
                     上 传
-                    <Uploader open={this.state.uploaderDialogOpen} onClose={this.onDialogClose}/>
+                    <Uploader open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
                 </Button>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
                     <FolderIcon className={classNames(classes.iconSmall)}/>

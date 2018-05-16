@@ -11,6 +11,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import SelectAllIcon from '@material-ui/icons/SelectAll'
 import FolderIcon from '@material-ui/icons//Folder';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
+import Uploader from './Uploader'
 
 import {
     Avatar,
@@ -156,7 +157,8 @@ const toolbarStyles = theme => ({
 class EnhancedTableToolbar extends React.Component {
     state = {
         anchorEl: null,
-        allSelected:false
+        allSelected:false,
+        uploaderDialogOpen:false,
     };
 
     handleClick = event => {
@@ -167,15 +169,27 @@ class EnhancedTableToolbar extends React.Component {
         this.setState({anchorEl: null});
     };
 
+    //
+    openUploaderDialog = event =>{
+        this.setState({uploaderDialogOpen:true});
+    };
+    onDialogClose = () =>{
+        this.state.uploaderDialogOpen = false;
+        console.log("after close "+this.state.uploaderDialogOpen);
+
+        // this.setState({uploaderDialogOpen:false});
+    };
+
     render() {
         const {onSelectAllClick, numSelected, rowCount, classes} = this.props;
         const {anchorEl,allSelected} = this.state;
 
         return (
             <Toolbar className={classNames(classes.root, {[classes.highlight]: numSelected > 0,})}>
-                <Button className={classes.button} variant="raised" size="small" color="secondary">
+                <Button onClick={this.openUploaderDialog} className={classes.button} variant="raised" size="small" color="secondary">
                     <FileUpload className={classNames(classes.iconSmall)}/>
                     上 传
+                    <Uploader open={this.state.uploaderDialogOpen} onClose={this.onDialogClose}/>
                 </Button>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
                     <FolderIcon className={classNames(classes.iconSmall)}/>

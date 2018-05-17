@@ -161,6 +161,11 @@ class EnhancedTableToolbar extends React.Component {
         open:false,
     };
 
+    constructor(props){
+        super(props);
+        this.handleDialogClose = this.handleDialogClose.bind(this);
+    }
+
     handleClick = event => {
         this.setState({anchorEl: event.currentTarget});
     };
@@ -171,12 +176,12 @@ class EnhancedTableToolbar extends React.Component {
 
     //
     handleClickOpen = () => {
-        this.setState({ open: true });
+        this.setState({ open: !this.state.open });
     };
 
-    handleDialogClose = () => {
-        console.log("onClose");
+    handleDialogClose = (uploadResult) => {
         this.setState({ open: !this.state.open });
+        console.log(uploadResult);
     };
 
 
@@ -188,7 +193,7 @@ class EnhancedTableToolbar extends React.Component {
             <Toolbar className={classNames(classes.root, {[classes.highlight]: numSelected > 0,})}>
                 <Button onClick={this.handleClickOpen} className={classes.button} variant="raised" size="small" color="secondary">
                     <FileUpload className={classNames(classes.iconSmall)}/>
-                    上 传
+                    上 传{this.state.open.toString()}
                     <Uploader open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
                 </Button>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">

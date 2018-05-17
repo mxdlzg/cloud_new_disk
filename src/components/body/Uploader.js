@@ -64,19 +64,16 @@ const statusTextOverride = {
 class Uploader extends React.Component {
     constructor(props){
         super(props);
-        this.state = {
-            open: props.open
-        };
         this.handleClose = this.handleClose.bind(this);
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.open == this.state.open) {
-            console.log("not changed")
-        }else {
-            this.setState({open:nextProps.open});
-        }
-    }
+    // componentWillReceiveProps(nextProps){
+    //     if (nextProps.open == this.state.open) {
+    //         console.log("not changed")
+    //     }else {
+    //         this.setState({open:nextProps.open});
+    //     }
+    // }
 
     // shouldComponentUpdate(nextProps, nextState){
     //     console.log(nextProps);
@@ -91,9 +88,9 @@ class Uploader extends React.Component {
         uploader.methods.uploadStoredFiles();
     };
 
-    handleClose = () =>{
-        this.setState({open:false});
-        this.props.onClose();
+    handleClose = (e) =>{
+        //TODO::返回上传结果，告诉父级是否刷新列表
+        this.props.onClose(['rest1','rest2']);
     };
 
     render() {
@@ -104,7 +101,7 @@ class Uploader extends React.Component {
             <div>
                 {/*<Button onClick={this.handleClickOpen}>Open form dialog</Button>*/}
                 <Dialog
-                    open={this.state.open}
+                    open={this.props.open}
                     onClose={this.handleClose}
                     aria-labelledby="form-dialog-title"
                     disableBackdropClick={false}
@@ -118,7 +115,7 @@ class Uploader extends React.Component {
                         <Button onClick={this.handleUpload} color="secondary">
                             上传
                         </Button>
-                        <Button onClick={this.handleClose.bind(this)} color="secondary">
+                        <Button onClick={this.handleClose} color="secondary">
                             取消
                         </Button>
                     </DialogActions>

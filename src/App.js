@@ -4,6 +4,7 @@ import Navigation from "./components/navigation/Navigation";
 import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles'
 import {BrowserRouter} from 'react-router-dom'
 import Root from "./components/Root";
+import Parent from "./components/demotest/Test"
 
 //Whole Theme
 const theme = createMuiTheme({

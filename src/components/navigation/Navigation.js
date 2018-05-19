@@ -15,7 +15,7 @@ import Menu, {MenuItem} from 'material-ui/Menu';
 import classNames from 'classnames';
 import purple from 'material-ui/colors/purple';
 import red from 'material-ui/colors/red';
-import {Drawer} from "material-ui";
+import {Drawer, Snackbar} from "material-ui";
 import Divider from "material-ui/es/Divider/Divider";
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -109,7 +109,11 @@ class Navigation extends Component {
         open: false,
         auth: true,
         anchorEl: null,
-        canOpenDrawer: false
+        canOpenDrawer: false,
+        snackOpen: false,
+        vertical: 'top',
+        horizontal: 'center',
+        msg:''
     };
 
     constructor(props){
@@ -144,9 +148,17 @@ class Navigation extends Component {
         this.setState({anchorEl: null});
     };
 
+    handleSnackOpen = (msg) => {
+        this.setState({msg:msg});
+        this.setState({ snackOpen: !this.state.snackOpen });
+    };
+    handleSnackClose = () => {
+        this.setState({ snackOpen: !this.state.snackOpen });
+    };
+
     render() {
         const {classes} = this.props;
-        const {auth, anchorEl, canOpenDrawer} = this.state;
+        const {auth, anchorEl, canOpenDrawer,snackOpen,msg,vertical,horizontal} = this.state;
         const open = Boolean(anchorEl);
         const {theme} = this.props;
 
@@ -213,7 +225,16 @@ class Navigation extends Component {
                 )}
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
-                    <Main handler={this.handler}/>
+                    <Main handler={this.handler} onToast={this.handleSnackOpen.bind(this)}/>
+                    <Snackbar
+                        anchorOrigin={{vertical, horizontal}}
+                        open={snackOpen}
+                        onClose={this.handleSnackClose}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">{msg}</span>}
+                    />
                 </main>
             </div>
         );

@@ -5,6 +5,8 @@ import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles'
 import {BrowserRouter} from 'react-router-dom'
 import Root from "./components/Root";
 import Parent from "./components/demotest/Test"
+import {CookiesProvider} from 'react-cookie'
+import PositionedSnackbar from "./components/demotest/SnackTest";
 
 //Whole Theme
 const theme = createMuiTheme({
@@ -19,10 +21,10 @@ const theme = createMuiTheme({
             light: '#46b0f3',
             main: '#2196f3',
             dark: '#1976d2',
-            light_grey:'#f5f5f5',
+            light_grey: '#f5f5f5',
             contrastText: '#fff',
-            lightGreyText:'#949494',
-            blackText:'#000000'
+            lightGreyText: '#949494',
+            blackText: '#000000'
         },
         status: {
             danger: 'orange',
@@ -33,11 +35,13 @@ const theme = createMuiTheme({
 class App extends Component {
     render() {
         return (
-            <BrowserRouter>
-                <MuiThemeProvider theme={theme}>
-                    <Root/>
-                </MuiThemeProvider>
-            </BrowserRouter>
+            //<CookiesProvider>
+                <BrowserRouter>
+                    <MuiThemeProvider theme={theme}>
+                        <Root/>
+                    </MuiThemeProvider>
+                </BrowserRouter>
+            //</CookiesProvider>
         );
     }
 }

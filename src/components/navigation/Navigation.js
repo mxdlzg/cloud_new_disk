@@ -183,7 +183,7 @@ class Navigation extends Component {
                                     aria-owns={open ? 'menu-appbar' : null}
                                     aria-haspopup="true"
                                     onClick={this.handleMenu}
-                                    color="#f0f0f0"
+                                    color="secondary"
                                 >
                                     <AccountCircle/>
                                 </IconButton>

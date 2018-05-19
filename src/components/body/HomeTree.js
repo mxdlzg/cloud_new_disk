@@ -36,14 +36,14 @@ const styles = theme => ({
     nested: {
         paddingLeft: theme.spacing.unit * 4,
     },
-    menuItem: {
-        '&:focus': {
-            backgroundColor: theme.palette.primary.main,
-            '& $primary, & $icon': {
-                color: theme.palette.common.white,
-            },
-        },
-    },
+    // menuItem: {
+    //     '&:focus': {
+    //         backgroundColor: theme.palette.primary.main,
+    //         '& $primary, & $icon': {
+    //             color: theme.palette.primary.white,
+    //         },
+    //     },
+    // },
     newBtn:{
         marginLeft:60,
         marginTop:10

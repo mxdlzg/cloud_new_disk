@@ -16,15 +16,17 @@ const theme = createMuiTheme({
             main: '#fff',
             dark: '#002884',
             contrastText: '#fff',
+            white: '#fff'
         },
         secondary: {
             light: '#46b0f3',
             main: '#2196f3',
             dark: '#1976d2',
             light_grey: '#f5f5f5',
+            mid_grey:'#f0f0f0',
             contrastText: '#fff',
             lightGreyText: '#949494',
-            blackText: '#000000'
+            blackText: '#000000',
         },
         status: {
             danger: 'orange',

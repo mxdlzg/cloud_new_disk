@@ -208,7 +208,7 @@ class EnhancedTableToolbar extends React.Component {
                 <div className={classes.spacer}/>
                 <Tooltip title="全选">
                     <IconButton aria-label="全选" onClick={onSelectAllClick}>
-                        <SelectAllIcon color={numSelected === rowCount ? "secondary" : "default"}/>
+                        <SelectAllIcon color={numSelected === rowCount ? "secondary" : "inherit"}/>
                     </IconButton>
                 </Tooltip>
                 <div className={classes.actions}>

@@ -84,7 +84,7 @@ class Uploader extends React.Component {
     //     console.log(nextProps);
     // }
 
-    handleUpload = () =>{
+    handleUpload = (e) =>{
         uploader.methods.uploadStoredFiles();
     };
 

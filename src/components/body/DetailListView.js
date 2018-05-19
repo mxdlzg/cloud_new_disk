@@ -157,11 +157,11 @@ const toolbarStyles = theme => ({
 class EnhancedTableToolbar extends React.Component {
     state = {
         anchorEl: null,
-        allSelected:false,
-        open:false,
+        allSelected: false,
+        open: false,
     };
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.handleDialogClose = this.handleDialogClose.bind(this);
     }
@@ -175,27 +175,28 @@ class EnhancedTableToolbar extends React.Component {
     };
 
     //
-    handleClickOpen = () => {
-        this.setState({ open: !this.state.open });
+    handleClickOpen = (e) => {
+        this.setState({open: !this.state.open});
     };
 
     handleDialogClose = (uploadResult) => {
-        this.setState({ open: !this.state.open });
+        this.setState({open: !this.state.open});
         console.log(uploadResult);
     };
 
 
     render() {
         const {onSelectAllClick, numSelected, rowCount, classes} = this.props;
-        const {anchorEl,allSelected} = this.state;
+        const {anchorEl, allSelected} = this.state;
 
         return (
             <Toolbar className={classNames(classes.root, {[classes.highlight]: numSelected > 0,})}>
-                <Button onClick={this.handleClickOpen} className={classes.button} variant="raised" size="small" color="secondary">
+                <Button onClick={this.handleClickOpen} className={classes.button} variant="raised" size="small"
+                        color="secondary">
                     <FileUpload className={classNames(classes.iconSmall)}/>
                     上 传{this.state.open.toString()}
-                    <Uploader open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
                 </Button>
+                <Uploader open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
                     <FolderIcon className={classNames(classes.iconSmall)}/>
                     新建文件夹
@@ -248,7 +249,7 @@ class EnhancedTable extends React.Component {
         this.state = {
             order: 'asc',
             orderBy: 'calories',
-            allSelected:true,
+            allSelected: true,
             selected: [],
             data: [
                 createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Cupcake', 305, 3.7, 67, 4.3),
@@ -288,7 +289,7 @@ class EnhancedTable extends React.Component {
     };
 
     handleSelectAllClick = (event, checked) => {
-        this.setState({allSelected:checked});
+        this.setState({allSelected: checked});
         if (checked) {
             this.setState({selected: this.state.data.map(n => n.id)});
             return;
@@ -298,7 +299,7 @@ class EnhancedTable extends React.Component {
 
     handleSelectAll = () => {
         const {allSelected} = this.state;
-        this.setState({allSelected:!allSelected});
+        this.setState({allSelected: !allSelected});
         if (allSelected) {
             this.setState({selected: this.state.data.map(n => n.id)});
             return;

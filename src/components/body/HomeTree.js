@@ -75,7 +75,7 @@ class HomeTreeNode extends React.Component {
         if (aim.hasChild) {
             //TODO::加载Loading界面
             const newData = this.state.AppValue.updateIn(pathArr, value => {
-                // console.log(value);
+                //console.log(value);
                 let tp = value.toJS();
                 tp.open = !tp.open;
                 return fromJS(tp);

@@ -230,7 +230,7 @@ class Navigation extends Component {
                         anchorOrigin={{vertical, horizontal}}
                         open={snackOpen}
                         onClose={this.handleSnackClose}
-                        ContentProps={{
+                        contentprops={{
                             'aria-describedby': 'message-id',
                         }}
                         message={<span id="message-id">{msg}</span>}

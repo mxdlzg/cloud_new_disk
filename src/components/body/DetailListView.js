@@ -10,6 +10,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import SelectAllIcon from '@material-ui/icons/SelectAll'
 import FolderIcon from '@material-ui/icons//Folder';
+import RefreshIcon from '@material-ui/icons/Refresh'
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
 import Uploader from './Uploader'
 import {NetContext} from "../../App";
@@ -210,7 +211,7 @@ class EnhancedTableToolbar extends React.Component {
 
 
     render() {
-        const {onSelectAllClick, numSelected, rowCount, classes} = this.props;
+        const {onSelectAllClick, onRefresh, numSelected, rowCount, classes} = this.props;
         const {anchorEl, allSelected} = this.state;
 
         return (
@@ -230,6 +231,11 @@ class EnhancedTableToolbar extends React.Component {
                     下载
                 </Button>
                 <div className={classes.spacer}/>
+                <Tooltip title="刷新">
+                    <IconButton aria-label="刷新" onClick={onRefresh}>
+                        <RefreshIcon/>
+                    </IconButton>
+                </Tooltip>
                 <Tooltip title="全选">
                     <IconButton aria-label="全选" onClick={onSelectAllClick}>
                         <SelectAllIcon color={numSelected === rowCount ? "secondary" : "inherit"}/>
@@ -284,29 +290,45 @@ class EnhancedTable extends React.Component {
             page: 0,
             rowsPerPage: 20,
             rowHeight: 40,
+            currentParentID: ''
         };
     }
 
-    componentDidMount(){
+    componentDidMount() {
         console.log("did mount");
-        this.requestData("nd4");
+        //this.requestData("nd1");
     }
 
     /**
      * Fetch items of parent dir from server
      * @param parentDirID
      */
-    requestData(parentDirID){
-        $.post("http://localhost/CloudDiskServer/ServerOP/StartListener.php",{
-            "clientType":"getDir",
-            "parentDirID":parentDirID,
-        },function (data, status) {
-            if (status) {
+    requestData(parentDirID) {
+        this.setState({currentParentID: parentDirID});
 
-            }else {
-
+        $.ajax("http://192.168.1.2/CloudDiskServer/ServerOP/StartListener.php", {
+            type: "POST",
+            data: {
+                clientType: "getDir",
+                parentDirID: parentDirID,
+            },
+            dataType: "json",
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function (data, status) {
+                if (status) {
+                    alert(JSON.stringify(data));
+                }
+            }.bind(this),
+            error: function (msg) {
+                alert(JSON.stringify(msg));
             }
-        }.bind(this));
+        });
+    }
+
+    refresh() {
+        this.requestData(this.state.currentParentID);
     }
 
     /**
@@ -402,7 +424,9 @@ class EnhancedTable extends React.Component {
 
         return (
             <Paper className={classes.root} elevation={6}>
-                <EnhancedTableToolbar onSelectAllClick={this.handleSelectAll} rowCount={data.length}
+                <EnhancedTableToolbar onSelectAllClick={this.handleSelectAll}
+                                      onRefresh={this.refresh.bind(this)}
+                                      rowCount={data.length}
                                       numSelected={selected.length}/>
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table}>

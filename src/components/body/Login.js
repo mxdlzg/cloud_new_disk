@@ -61,31 +61,70 @@ class Login extends React.Component {
             this.props.onToast("请填写登录信息");
             return;
         }
-        
-        $.post("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
-            "clientType": "login",
-            "user": this.state.user,
-            "pass": this.state.password
-        }, function (data, status) {
-            if (status) {
-                let rst = JSON.parse(data);
-                if (rst["type"] === 2) {
-                    switch (rst["status"]) {
-                        case 5:
-                            this.props.history.push('/home');
-                            break;
-                        case 6:
-                        case 7:
-                            this.props.onToast(rst["msg"]);
-                            break;
-                        default:
-                            break;
+
+        $.ajax("http://192.168.1.2/CloudDiskServer/ServerOP/StartListener.php",{
+            type: "POST",
+            data: {
+                clientType: "login",
+                user: this.state.user,
+                pass: this.state.password
+            },
+            dataType:"json",
+            xhrFields: {
+                withCredentials: true
+            },
+            success:function (data,status) {
+                if (status) {
+                    let rst = data;
+                    if (rst["type"] === 2) {
+                        switch (rst["status"]) {
+                            case 5:
+                                this.props.history.push('/home');
+                                break;
+                            case 6:
+                                this.props.onToast(rst["msg"]);
+                                this.props.history.push('/home');
+                                break;
+                            case 7:
+                                this.props.onToast(rst["msg"]);
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                } else {
+                    this.props.onToast("登陆请求失败");
                 }
-            } else {
-                this.props.onToast("登陆请求失败");
+            }.bind(this),
+            error:function (msg) {
+                alert(JSON.stringify(msg));
             }
-        }.bind(this));
+        });
+
+        // $.post("http://192.168.1.2/CloudDiskServer/ServerOP/StartListener.php", {
+        //     "clientType": "login",
+        //     "user": this.state.user,
+        //     "pass": this.state.password
+        // }, function (data, status) {
+        //     if (status) {
+        //         let rst = JSON.parse(data);
+        //         if (rst["type"] === 2) {
+        //             switch (rst["status"]) {
+        //                 case 5:
+        //                     this.props.history.push('/home');
+        //                     break;
+        //                 case 6:
+        //                 case 7:
+        //                     this.props.onToast(rst["msg"]);
+        //                     break;
+        //                 default:
+        //                     break;
+        //             }
+        //         }
+        //     } else {
+        //         this.props.onToast("登陆请求失败");
+        //     }
+        // }.bind(this));
     };
 
     render() {

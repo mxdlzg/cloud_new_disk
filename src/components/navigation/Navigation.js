@@ -223,19 +223,19 @@ class Navigation extends Component {
                         <List>{otherMailFolderListItems}</List>
                     </Drawer>
                 )}
-                <main className={classes.content}>
-                    <div className={classes.toolbar}/>
-                    <Main handler={this.handler} onToast={this.handleSnackOpen.bind(this)}/>
-                    <Snackbar
-                        anchorOrigin={{vertical, horizontal}}
-                        open={snackOpen}
-                        onClose={this.handleSnackClose}
-                        contentprops={{
-                            'aria-describedby': 'message-id',
-                        }}
-                        message={<span id="message-id">{msg}</span>}
-                    />
-                </main>
+                    <main className={classes.content}>
+                        <div className={classes.toolbar}/>
+                        <Main handler={this.handler} onToast={this.handleSnackOpen.bind(this)}/>
+                        <Snackbar
+                            anchorOrigin={{vertical, horizontal}}
+                            open={snackOpen}
+                            onClose={this.handleSnackClose}
+                            contentprops={{
+                                'aria-describedby': 'message-id',
+                            }}
+                            message={<span id="message-id">{msg}</span>}
+                        />
+                    </main>
             </div>
         );
     }

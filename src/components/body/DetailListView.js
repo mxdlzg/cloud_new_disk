@@ -12,6 +12,7 @@ import SelectAllIcon from '@material-ui/icons/SelectAll'
 import FolderIcon from '@material-ui/icons//Folder';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
 import Uploader from './Uploader'
+import {NetContext} from "../../App";
 
 import {
     Avatar,
@@ -53,17 +54,27 @@ const styles = theme => ({
 
 let counter = 0;
 
-function createData(iconUrl, name, calories, fat, carbs, protein) {
+/**
+ * Create List
+ * @param iconUrl
+ * @param name
+ * @param fileType
+ * @param fileSize
+ * @param changedTime
+ * @returns {{id: number, iconUrl: *, name: *, fileType: *, fileSize: *, changedTime: *}}
+ */
+function createData(iconUrl, name, fileType, fileSize, changedTime) {
     counter += 1;
-    return {id: counter, iconUrl, name, calories, fat, carbs, protein};
+    return {id: counter, iconUrl, name, fileType, fileSize, changedTime};
 }
 
+//List Column Data
 const columnData = [
     {id: 'iconUrl', numeric: false, disablePadding: false, label: '图标'},
     {id: 'name', numeric: false, disablePadding: true, label: '名称'},
-    {id: 'calories', numeric: true, disablePadding: false, label: '类型'},
-    {id: 'fat', numeric: true, disablePadding: false, label: '大小'},
-    {id: 'carbs', numeric: true, disablePadding: false, label: '修改时间'},
+    {id: 'fileType', numeric: true, disablePadding: false, label: '类型'},
+    {id: 'fileSize', numeric: true, disablePadding: false, label: '大小'},
+    {id: 'changedTime', numeric: true, disablePadding: false, label: '修改时间'},
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -117,6 +128,11 @@ EnhancedTableHead.propTypes = {
 };
 
 
+/**
+ * Toolbar Theme
+ * @param theme
+ * @returns {{root: {paddingRight: *, color: string, backgroundColor: string}, highlight: *, spacer: {flex: string}, actions: {color: *}, title: {flex: string}, iconSmall: {fontSize: number}, button: {marginLeft: number}, fileIcon: {width: number, height: number}}}
+ */
 const toolbarStyles = theme => ({
     root: {
         paddingRight: theme.spacing.unit,
@@ -174,11 +190,19 @@ class EnhancedTableToolbar extends React.Component {
         this.setState({anchorEl: null});
     };
 
-    //
+
+    /**
+     * Open uploader dialog
+     * @param e
+     */
     handleClickOpen = (e) => {
         this.setState({open: !this.state.open});
     };
 
+    /**
+     * Close uploader dialog
+     * @param uploadResult ,Result of uploader
+     */
     handleDialogClose = (uploadResult) => {
         this.setState({open: !this.state.open});
         console.log(uploadResult);
@@ -248,30 +272,48 @@ class EnhancedTable extends React.Component {
 
         this.state = {
             order: 'asc',
-            orderBy: 'calories',
+            orderBy: 'fileType',
             allSelected: true,
             selected: [],
             data: [
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Cupcake', 305, 3.7, 67, 4.3),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Donut', 452, 25.0, 51, 4.9),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Eclair', 262, 16.0, 24, 6.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Frozen yoghurt', 159, 6.0, 24, 4.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Gingerbread', 356, 16.0, 49, 3.9),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Honeycomb', 408, 3.2, 87, 6.5),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Jelly Bean', 375, 0.0, 94, 0.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'KitKat', 518, 26.0, 65, 7.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Lollipop', 392, 0.2, 98, 0.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Marshmallow', 318, 0, 81, 2.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Nougat', 360, 19.0, 9, 37.0),
-                createData('https://material-ui-next.com/static/images/uxceo-128.jpg', 'Oreo', 437, 18.0, 63, 4.0),
-            ].sort((a, b) => (a.calories < b.calories ? -1 : 1)),
+                createData('https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67),
+                createData('https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67),
+                createData('https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67),
+                createData('https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67),
+            ].sort((a, b) => (a.fileType < b.fileType ? -1 : 1)),
             page: 0,
             rowsPerPage: 20,
             rowHeight: 40,
         };
     }
 
+    componentDidMount(){
+        console.log("did mount");
+        this.requestData("nd4");
+    }
+
+    /**
+     * Fetch items of parent dir from server
+     * @param parentDirID
+     */
+    requestData(parentDirID){
+        $.post("http://localhost/CloudDiskServer/ServerOP/StartListener.php",{
+            "clientType":"getDir",
+            "parentDirID":parentDirID,
+        },function (data, status) {
+            if (status) {
+
+            }else {
+
+            }
+        }.bind(this));
+    }
+
+    /**
+     * Sort list
+     * @param event
+     * @param property
+     */
     handleRequestSort = (event, property) => {
         const orderBy = property;
         let order = 'desc';
@@ -288,6 +330,11 @@ class EnhancedTable extends React.Component {
         this.setState({data, order, orderBy});
     };
 
+    /**
+     * Select all item
+     * @param event
+     * @param checked
+     */
     handleSelectAllClick = (event, checked) => {
         this.setState({allSelected: checked});
         if (checked) {
@@ -328,10 +375,19 @@ class EnhancedTable extends React.Component {
         this.setState({selected: newSelected});
     };
 
+    /**
+     * Change page number
+     * @param event
+     * @param page
+     */
     handleChangePage = (event, page) => {
         this.setState({page});
     };
 
+    /**
+     * Change items per page
+     * @param event
+     */
     handleChangeRowsPerPage = event => {
         this.setState({rowsPerPage: event.target.value});
     };
@@ -376,9 +432,9 @@ class EnhancedTable extends React.Component {
                                             <img height={rowHeight} width={rowHeight} src={n.iconUrl}/>
                                         </TableCell>
                                         <TableCell padding="none">{n.name}</TableCell>
-                                        <TableCell numeric>{n.calories}</TableCell>
-                                        <TableCell numeric>{n.fat}</TableCell>
-                                        <TableCell numeric>{n.carbs}</TableCell>
+                                        <TableCell numeric>{n.fileType}</TableCell>
+                                        <TableCell numeric>{n.fileSize}</TableCell>
+                                        <TableCell numeric>{n.changedTime}</TableCell>
                                     </TableRow>
                                 );
                             })}

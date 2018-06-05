@@ -34,13 +34,15 @@ const theme = createMuiTheme({
     },
 });
 
+export const NetContext = React.createContext();
+
 class App extends Component {
     render() {
         return (
             //<CookiesProvider>
                 <BrowserRouter>
                     <MuiThemeProvider theme={theme}>
-                        <Root/>
+                            <Root/>
                     </MuiThemeProvider>
                 </BrowserRouter>
             //</CookiesProvider>

@@ -14,6 +14,7 @@ import RefreshIcon from '@material-ui/icons/Refresh'
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
 import Uploader from './Uploader'
 import {NetContext} from "../../App";
+import { withCookies, Cookies } from 'react-cookie';
 
 import {
     Avatar,
@@ -294,9 +295,26 @@ class EnhancedTable extends React.Component {
         };
     }
 
+    componentWillMount(){
+        const {cookies} = this.props;
+        this.setState({currentParentID: cookies.get('startID')||''});
+    }
+
     componentDidMount() {
         console.log("did mount");
-        //this.requestData("nd1");
+        this.requestData(this.state.currentParentID);
+    }
+
+    resetData(data){
+        if (data.length === 0) {
+            return;
+        }
+        counter = 0;
+        let tmpData = [];
+        data.map((item,i)=>{
+            tmpData.push(createData("https://cloud.mxdlzg.com/img/icon/"+item['type']+".png",item['name'],item['type'],0,''));
+        });
+        this.setState({data:tmpData.sort((a, b) => (a.fileType < b.fileType ? -1 : 1))});
     }
 
     /**
@@ -304,12 +322,14 @@ class EnhancedTable extends React.Component {
      * @param parentDirID
      */
     requestData(parentDirID) {
-        this.setState({currentParentID: parentDirID});
+        if (parentDirID !== '') {
+            this.setState({currentParentID: parentDirID});
+        }
 
-        $.ajax("http://192.168.1.2/CloudDiskServer/ServerOP/StartListener.php", {
+        $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
             type: "POST",
             data: {
-                clientType: "getDir",
+                clientType: "getAll",
                 parentDirID: parentDirID,
             },
             dataType: "json",
@@ -317,7 +337,9 @@ class EnhancedTable extends React.Component {
                 withCredentials: true
             },
             success: function (data, status) {
-                if (status) {
+                if (status && data["type"] === 8) {
+                    this.resetData(data["data"])
+                }else {
                     alert(JSON.stringify(data));
                 }
             }.bind(this),
@@ -493,4 +515,4 @@ EnhancedTable.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(EnhancedTable);
+export default withCookies(withStyles(styles)(EnhancedTable));

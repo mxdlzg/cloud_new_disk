@@ -62,7 +62,7 @@ class Login extends React.Component {
             return;
         }
 
-        $.ajax("http://192.168.1.2/CloudDiskServer/ServerOP/StartListener.php",{
+        $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php",{
             type: "POST",
             data: {
                 clientType: "login",

@@ -21,8 +21,9 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import {mailFolderListItems, otherMailFolderListItems} from './drawerData';
 import List from 'material-ui/List';
-import {Link} from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom'
 import Main from "../body/Main";
+import $ from "jquery";
 
 const primary1 = red[500]; // #F44336
 const accent1 = purple['A200']; // #E040FB
@@ -148,6 +149,47 @@ class Navigation extends Component {
         this.setState({anchorEl: null});
     };
 
+    handleQuit = () =>{
+        $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php",{
+            type: "POST",
+            data: {
+                clientType: "logout",
+            },
+            dataType:"json",
+            xhrFields: {
+                withCredentials: true
+            },
+            success:function (data,status) {
+                if (status) {
+                    let rst = data;
+                    if (rst["type"] === 3) {
+                        switch (rst["status"]) {
+                            case 8:
+                                this.props.history.push('/');
+                                break;
+                            case 9:
+                                this.handleSnackOpen(rst["msg"]);
+                                this.props.history.push('/');
+                                break;
+                            case 10:
+                                this.handleSnackOpen(rst["msg"]);
+                                this.props.history.push('/');
+                                break;
+                            default:
+                                this.props.history.push('/');
+                                break;
+                        }
+                    }
+                } else {
+                    this.handleSnackOpen("注销请求失败");
+                }
+            }.bind(this),
+            error:function (msg) {
+                alert(JSON.stringify(msg));
+            }
+        });
+    };
+
     handleSnackOpen = (msg) => {
         this.setState({msg:msg});
         this.setState({ snackOpen: !this.state.snackOpen });
@@ -201,8 +243,8 @@ class Navigation extends Component {
                                     open={open}
                                     onClose={this.handleClose}
                                 >
-                                    <MenuItem onClick={this.handleClose}>Profile</MenuItem>
-                                    <MenuItem onClick={this.handleClose}>My account</MenuItem>
+                                    <MenuItem onClick={this.handleClose}>个人中心</MenuItem>
+                                    <MenuItem onClick={this.handleQuit}>退出</MenuItem>
                                 </Menu>
                             </div>
                         )}
@@ -246,4 +288,4 @@ Navigation.propTypes = {
     theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, {withTheme: true})(Navigation);
+export default withRouter(withStyles(styles, {withTheme: true})(Navigation));

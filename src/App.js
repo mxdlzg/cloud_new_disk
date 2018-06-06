@@ -39,13 +39,13 @@ export const NetContext = React.createContext();
 class App extends Component {
     render() {
         return (
-            //<CookiesProvider>
+            <CookiesProvider>
                 <BrowserRouter>
                     <MuiThemeProvider theme={theme}>
                             <Root/>
                     </MuiThemeProvider>
                 </BrowserRouter>
-            //</CookiesProvider>
+            </CookiesProvider>
         );
     }
 }

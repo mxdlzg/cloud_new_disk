@@ -390,8 +390,8 @@ class EnhancedTable extends React.Component {
      * Back to last dir
      */
     onBack(){
-        //last nodeID
-        let nextIndex = this.state.navigationList.lastIndexOf(this.state.currentParentID)-1;
+        //last nodeIDi
+        let nextIndex = this.state.navigationList.indexOf(this.state.currentParentID)-1;
         if (nextIndex>=0){
             let nodeID = this.state.navigationList.get(nextIndex);
 
@@ -409,7 +409,7 @@ class EnhancedTable extends React.Component {
         //TODO::导航栈内，back之后返回peek-1位置的dir，
         //TODO::但是不删除current,如果在peek-1位置进入了另外的文件夹则pop掉peek-1之后的所有(包括current)
 
-        let nextIndex = this.state.navigationList.lastIndexOf(this.state.currentParentID)+1;
+        let nextIndex = this.state.navigationList.indexOf(this.state.currentParentID)+1;
         if (nextIndex>=0){
             this.forward(nextIndex);
         }
@@ -515,7 +515,6 @@ class EnhancedTable extends React.Component {
         let index = this.state.navigationList.indexOf(item.nodeID);
         if (index > -1) {   //If aim dir existed in history
             this.forward(index);
-            return;
         }else {
             //Clear history which behind this nodeID
             let index = this.state.navigationList.indexOf(this.state.currentParentID);  //当前dir可能在history内不是last

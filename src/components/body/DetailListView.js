@@ -12,7 +12,10 @@ import SelectAllIcon from '@material-ui/icons/SelectAll'
 import FolderIcon from '@material-ui/icons//Folder';
 import RefreshIcon from '@material-ui/icons/Refresh'
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import Uploader from './Uploader'
+import {List as ImList} from 'immutable'
 import {NetContext} from "../../App";
 import { withCookies, Cookies } from 'react-cookie';
 
@@ -30,6 +33,8 @@ import {
     Tooltip
 } from "material-ui";
 import {FileUpload} from "@material-ui/icons/es/index";
+import {Stack} from "immutable";
+import List from "../learnredux/List";
 
 const styles = theme => ({
     root: {
@@ -58,6 +63,7 @@ let counter = 0;
 
 /**
  * Create List
+ * @param nodeID
  * @param iconUrl
  * @param name
  * @param fileType
@@ -65,9 +71,9 @@ let counter = 0;
  * @param changedTime
  * @returns {{id: number, iconUrl: *, name: *, fileType: *, fileSize: *, changedTime: *}}
  */
-function createData(iconUrl, name, fileType, fileSize, changedTime) {
+function createData(nodeID,iconUrl, name, fileType, fileSize, changedTime) {
     counter += 1;
-    return {id: counter, iconUrl, name, fileType, fileSize, changedTime};
+    return {id: counter,nodeID, iconUrl, name, fileType, fileSize, changedTime};
 }
 
 //List Column Data
@@ -211,8 +217,9 @@ class EnhancedTableToolbar extends React.Component {
     };
 
 
+
     render() {
-        const {onSelectAllClick, onRefresh, numSelected, rowCount, classes} = this.props;
+        const {onSelectAllClick, onRefresh,onBack,onForward, numSelected, rowCount, classes} = this.props;
         const {anchorEl, allSelected} = this.state;
 
         return (
@@ -232,6 +239,16 @@ class EnhancedTableToolbar extends React.Component {
                     下载
                 </Button>
                 <div className={classes.spacer}/>
+                <Tooltip title="后退">
+                    <IconButton aria-label="后退" onClick={onBack}>
+                        <ArrowBackIcon/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="前进">
+                    <IconButton aria-label="前进" onClick={onForward}>
+                        <ArrowForwardIcon/>
+                    </IconButton>
+                </Tooltip>
                 <Tooltip title="刷新">
                     <IconButton aria-label="刷新" onClick={onRefresh}>
                         <RefreshIcon/>
@@ -274,24 +291,29 @@ EnhancedTableToolbar.propTypes = {
 EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
 
 class EnhancedTable extends React.Component {
+    /**
+     * Life circle constructor
+     * @param props
+     * @param context
+     */
     constructor(props, context) {
         super(props, context);
-
         this.state = {
             order: 'asc',
             orderBy: 'fileType',
             allSelected: true,
             selected: [],
             data: [
-                createData('https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67),
-                createData('https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67),
-                createData('https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67),
-                createData('https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67),
+                createData('nd1','https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67),
+                createData('nd2','https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67),
+                createData('nd3','https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67),
+                createData('nd4','https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67),
             ].sort((a, b) => (a.fileType < b.fileType ? -1 : 1)),
             page: 0,
             rowsPerPage: 20,
             rowHeight: 40,
-            currentParentID: ''
+            currentParentID: '',
+            navigationList:new ImList()
         };
     }
 
@@ -301,20 +323,7 @@ class EnhancedTable extends React.Component {
     }
 
     componentDidMount() {
-        console.log("did mount");
         this.requestData(this.state.currentParentID);
-    }
-
-    resetData(data){
-        if (data.length === 0) {
-            return;
-        }
-        counter = 0;
-        let tmpData = [];
-        data.map((item,i)=>{
-            tmpData.push(createData("https://cloud.mxdlzg.com/img/icon/"+item['type']+".png",item['name'],item['type'],0,''));
-        });
-        this.setState({data:tmpData.sort((a, b) => (a.fileType < b.fileType ? -1 : 1))});
     }
 
     /**
@@ -325,7 +334,6 @@ class EnhancedTable extends React.Component {
         if (parentDirID !== '') {
             this.setState({currentParentID: parentDirID});
         }
-
         $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
             type: "POST",
             data: {
@@ -338,7 +346,13 @@ class EnhancedTable extends React.Component {
             },
             success: function (data, status) {
                 if (status && data["type"] === 8) {
-                    this.resetData(data["data"])
+                    let newData = data["data"];
+                    //Push into stack
+                    if (this.state.navigationList.indexOf(parentDirID)<= -1 && newData.length>0) {     //If not on back
+                        this.setState({navigationList:this.state.navigationList.push(parentDirID)});
+                    }
+                    //Show new data
+                    this.resetData(newData);
                 }else {
                     alert(JSON.stringify(data));
                 }
@@ -349,12 +363,67 @@ class EnhancedTable extends React.Component {
         });
     }
 
+    /**
+     * Refresh current dir
+     */
     refresh() {
         this.requestData(this.state.currentParentID);
     }
 
     /**
-     * Sort list
+     * Reset this.state.data
+     * @param data
+     */
+    resetData(data){
+        if (data.length === 0) {
+            return;
+        }
+        counter = 0;
+        let tmpData = [];
+        data.map((item,i)=>{
+            tmpData.push(createData(item['nodeId'],"https://cloud.mxdlzg.com/img/icon/"+item['type']+".png",item['name'],item['type'],0,''));
+        });
+        this.setState({data:tmpData.sort((a, b) => (a.fileType < b.fileType ? -1 : 1))});
+    }
+
+    /**
+     * Back to last dir
+     */
+    onBack(){
+        //last nodeID
+        let nextIndex = this.state.navigationList.lastIndexOf(this.state.currentParentID)-1;
+        if (nextIndex>=0){
+            let nodeID = this.state.navigationList.get(nextIndex);
+
+            if (nodeID !== null) {
+                this.requestData(nodeID);
+            }
+        }
+
+    }
+
+    /**
+     * Enter next dir
+     */
+    onForward(){
+        //TODO::导航栈内，back之后返回peek-1位置的dir，
+        //TODO::但是不删除current,如果在peek-1位置进入了另外的文件夹则pop掉peek-1之后的所有(包括current)
+
+        let nextIndex = this.state.navigationList.lastIndexOf(this.state.currentParentID)+1;
+        if (nextIndex>=0){
+            this.forward(nextIndex);
+        }
+    }
+    forward(nextIndex){
+        let nodeID = this.state.navigationList.get(nextIndex);
+
+        if (nodeID !== null) {
+            this.requestData(nodeID);
+        }
+    }
+
+    /**
+     * Sort current dir
      * @param event
      * @param property
      */
@@ -375,7 +444,7 @@ class EnhancedTable extends React.Component {
     };
 
     /**
-     * Select all item
+     * Select all item in current dir
      * @param event
      * @param checked
      */
@@ -387,7 +456,6 @@ class EnhancedTable extends React.Component {
         }
         this.setState({selected: []});
     };
-
     handleSelectAll = () => {
         const {allSelected} = this.state;
         this.setState({allSelected: !allSelected});
@@ -398,7 +466,13 @@ class EnhancedTable extends React.Component {
         this.setState({selected: []});
     };
 
+    /**
+     * Handle item(file and dir) click event
+     * @param event
+     * @param id
+     */
     handleClick = (event, id) => {
+        //Change effect
         const {selected} = this.state;
         const selectedIndex = selected.indexOf(id);
         let newSelected = [];
@@ -415,9 +489,42 @@ class EnhancedTable extends React.Component {
                 selected.slice(selectedIndex + 1),
             );
         }
-
         this.setState({selected: newSelected});
+
+        //If dir
+        let item = this.state.data.find(item=>{
+            return item.id === id;
+        });
+        if (item.fileType === 'dir') {
+            this.handleDirItemClick(item);
+        }
     };
+
+    /**
+     * Handle dir item click event
+     * Enter aim dir
+     * @param item
+     */
+    handleDirItemClick(item){
+        //TODO::当前位置压栈，请求目标dir内的信息，目标dir进栈，清空当前文件夹选中信息,进入目标dir
+        //Clear
+        this.setState({selected: []});
+
+        //TODO:: forward一起测试
+        //Check if can pop item that top of item.nodeID
+        let index = this.state.navigationList.indexOf(item.nodeID);
+        if (index > -1) {   //If aim dir existed in history
+            this.forward(index);
+            return;
+        }else {
+            //Clear history which behind this nodeID
+            let index = this.state.navigationList.indexOf(this.state.currentParentID);  //当前dir可能在history内不是last
+            this.setState({navigationList:this.state.navigationList.slice(0,index+1)});
+
+            //Request dir info
+            this.requestData(item.nodeID);
+        }
+    }
 
     /**
      * Change page number
@@ -448,6 +555,8 @@ class EnhancedTable extends React.Component {
             <Paper className={classes.root} elevation={6}>
                 <EnhancedTableToolbar onSelectAllClick={this.handleSelectAll}
                                       onRefresh={this.refresh.bind(this)}
+                                      onBack={this.onBack.bind(this)}
+                                      onForward={this.onForward.bind(this)}
                                       rowCount={data.length}
                                       numSelected={selected.length}/>
                 <div className={classes.tableWrapper}>

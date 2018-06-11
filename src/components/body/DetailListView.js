@@ -350,7 +350,7 @@ class EnhancedTable extends React.Component {
                 if (status && data["type"] === 8) {
                     let newData = data["data"];
                     //Push into stack
-                    if (this.state.navigationList.indexOf(parentDirID)<= -1 && newData.length>0) {     //If not on back
+                    if (this.state.navigationList.indexOf(parentDirID)<= -1) {     //If not on back
                         this.setState({navigationList:this.state.navigationList.push(parentDirID)});
                     }
                     //Show new data
@@ -377,9 +377,9 @@ class EnhancedTable extends React.Component {
      * @param data
      */
     resetData(data){
-        if (data.length === 0) {
-            return;
-        }
+        // if (data.length === 0) {
+        //     return;
+        // }
         counter = 0;
         let tmpData = [];
         data.map((item,i)=>{

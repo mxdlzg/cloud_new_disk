@@ -16,8 +16,8 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import Uploader from './Uploader'
 import {List as ImList} from 'immutable'
-import {NetContext} from "../../App";
 import { withCookies, Cookies } from 'react-cookie';
+
 
 import {
     Avatar,
@@ -209,11 +209,13 @@ class EnhancedTableToolbar extends React.Component {
 
     /**
      * Close uploader dialog
-     * @param uploadResult ,Result of uploader
+     * @param needRefresh
      */
-    handleDialogClose = (uploadResult) => {
+    handleDialogClose = (needRefresh) => {
         this.setState({open: !this.state.open});
-        console.log(uploadResult);
+        if (needRefresh) {
+            this.props.onRefresh();
+        }
     };
 
 
@@ -229,7 +231,7 @@ class EnhancedTableToolbar extends React.Component {
                     <FileUpload className={classNames(classes.iconSmall)}/>
                     上 传{this.state.open.toString()}
                 </Button>
-                <Uploader open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
+                <Uploader currentParentID={this.props.currentParentID} open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
                     <FolderIcon className={classNames(classes.iconSmall)}/>
                     新建文件夹
@@ -288,7 +290,7 @@ EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
 
-EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
+EnhancedTableToolbar = withCookies(withStyles(toolbarStyles)(EnhancedTableToolbar));
 
 class EnhancedTable extends React.Component {
     /**
@@ -557,7 +559,8 @@ class EnhancedTable extends React.Component {
                                       onBack={this.onBack.bind(this)}
                                       onForward={this.onForward.bind(this)}
                                       rowCount={data.length}
-                                      numSelected={selected.length}/>
+                                      numSelected={selected.length}
+                                        currentParentID={this.state.currentParentID}/>
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table}>
                         <EnhancedTableHead

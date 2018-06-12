@@ -35,6 +35,7 @@ import {
 import {FileUpload} from "@material-ui/icons/es/index";
 import {Stack} from "immutable";
 import List from "../learnredux/List";
+import Downloader from "./Downloader";
 
 const styles = theme => ({
     root: {
@@ -69,11 +70,12 @@ let counter = 0;
  * @param fileType
  * @param fileSize
  * @param changedTime
+ * @param parentPath
  * @returns {{id: number, iconUrl: *, name: *, fileType: *, fileSize: *, changedTime: *}}
  */
-function createData(nodeID,iconUrl, name, fileType, fileSize, changedTime) {
+function createData(nodeID,iconUrl, name, fileType, fileSize, changedTime,parentPath) {
     counter += 1;
-    return {id: counter,nodeID, iconUrl, name, fileType, fileSize, changedTime};
+    return {id: counter,nodeID, iconUrl, name, fileType, fileSize, changedTime,parentPath};
 }
 
 //List Column Data
@@ -218,10 +220,8 @@ class EnhancedTableToolbar extends React.Component {
         }
     };
 
-
-
     render() {
-        const {onSelectAllClick, onRefresh,onBack,onForward, numSelected, rowCount, classes} = this.props;
+        const {onSelectAllClick,onDownloadClick, onRefresh,onBack,onForward, numSelected, rowCount, classes} = this.props;
         const {anchorEl, allSelected} = this.state;
 
         return (
@@ -229,14 +229,14 @@ class EnhancedTableToolbar extends React.Component {
                 <Button onClick={this.handleClickOpen} className={classes.button} variant="raised" size="small"
                         color="secondary">
                     <FileUpload className={classNames(classes.iconSmall)}/>
-                    上 传{this.state.open.toString()}
+                    上 传
                 </Button>
                 <Uploader currentParentID={this.props.currentParentID} open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
                 <Button className={classes.button} variant="raised" size="small" color="secondary">
                     <FolderIcon className={classNames(classes.iconSmall)}/>
                     新建文件夹
                 </Button>
-                <Button className={classes.button} variant="raised" size="small" color="secondary">
+                <Button onClick={onDownloadClick} className={classes.button} variant="raised" size="small" color="secondary">
                     <CloudDownloadIcon className={classNames(classes.iconSmall)}/>
                     下载
                 </Button>
@@ -306,16 +306,18 @@ class EnhancedTable extends React.Component {
             allSelected: true,
             selected: [],
             data: [
-                createData('nd1','https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67),
-                createData('nd2','https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67),
-                createData('nd3','https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67),
-                createData('nd4','https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67),
+                createData('nd1','https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67,""),
+                createData('nd2','https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67,""),
+                createData('nd3','https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67,""),
+                createData('nd4','https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67,""),
             ].sort((a, b) => (a.fileType < b.fileType ? -1 : 1)),
             page: 0,
             rowsPerPage: 20,
             rowHeight: 40,
             currentParentID: '',
-            navigationList:new ImList()
+            currentParentPath:"",
+            navigationList:new ImList(),
+            downloadDialogOpen:false
         };
     }
 
@@ -334,35 +336,45 @@ class EnhancedTable extends React.Component {
      */
     requestData(parentDirID) {
         if (parentDirID !== '') {
-            this.setState({currentParentID: parentDirID});
-        }
-        $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
-            type: "POST",
-            data: {
-                clientType: "getAll",
-                parentDirID: parentDirID,
-            },
-            dataType: "json",
-            xhrFields: {
-                withCredentials: true
-            },
-            success: function (data, status) {
-                if (status && data["type"] === 8) {
-                    let newData = data["data"];
-                    //Push into stack
-                    if (this.state.navigationList.indexOf(parentDirID)<= -1) {     //If not on back
-                        this.setState({navigationList:this.state.navigationList.push(parentDirID)});
-                    }
-                    //Show new data
-                    this.resetData(newData);
-                }else {
-                    alert(JSON.stringify(data));
+            let item = this.state.data.find(
+                e => {
+                   return e.nodeID === parentDirID;
                 }
-            }.bind(this),
-            error: function (msg) {
-                alert(JSON.stringify(msg));
-            }
-        });
+            );
+            this.setState({
+                currentParentID: parentDirID,
+                currentParentPath: item==null?'':item.parentPath
+            });
+            const parentPath = item==null?'':item.parentPath;
+            $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
+                type: "POST",
+                data: {
+                    clientType: "getAll",
+                    parentDirID: parentDirID,
+                    parentPath: parentPath
+                },
+                dataType: "json",
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function (data, status) {
+                    if (status && data["type"] === 8) {
+                        let newData = data["data"];
+                        //Push into stack
+                        if (this.state.navigationList.indexOf(parentDirID)<= -1) {     //If not on back
+                            this.setState({navigationList:this.state.navigationList.push(parentDirID)});
+                        }
+                        //Show new data
+                        this.resetData(newData);
+                    }else {
+                        alert(JSON.stringify(data));
+                    }
+                }.bind(this),
+                error: function (msg) {
+                    alert(JSON.stringify(msg));
+                }
+            });
+        }
     }
 
     /**
@@ -383,7 +395,7 @@ class EnhancedTable extends React.Component {
         counter = 0;
         let tmpData = [];
         data.map((item,i)=>{
-            tmpData.push(createData(item['nodeId'],"https://cloud.mxdlzg.com/img/icon/"+item['type']+".png",item['name'],item['type'],0,''));
+            tmpData.push(createData(item['nodeID'],"https://cloud.mxdlzg.com/img/icon/"+item['type']+".png",item['name'],item['type'],0,'',item['parentPath']));
         });
         this.setState({data:tmpData.sort((a, b) => (a.fileType < b.fileType ? -1 : 1))});
     }
@@ -550,6 +562,35 @@ class EnhancedTable extends React.Component {
     }
 
     /**
+     * Handle download button click event
+     * @param event
+     */
+    handleDownloadClick(event){
+        if (this.state.selected.length > 0) {
+            const selected = this.state.selected;
+            const downloadList = this.state.data.filter((e)=>{
+                return selected.indexOf(e.id)>=0;
+            });
+            
+            this.setState({
+                downloadList:downloadList,
+                downloadDialogOpen:!this.state.downloadDialogOpen,
+            })
+        }else {
+            this.props.onToast("请选择需要下载的文件")
+        }
+    }
+
+    /**
+     * Handle download dialog close event
+     */
+    handleDownloadDialogClose(){
+        this.setState({
+            downloadDialogOpen:!this.state.downloadDialogOpen,
+        })
+    }
+
+    /**
      * Change page number
      * @param event
      * @param page
@@ -577,12 +618,14 @@ class EnhancedTable extends React.Component {
         return (
             <Paper className={classes.root} elevation={6}>
                 <EnhancedTableToolbar onSelectAllClick={this.handleSelectAll}
+                                      onDownloadClick={this.handleDownloadClick.bind(this)}
                                       onRefresh={this.refresh.bind(this)}
                                       onBack={this.onBack.bind(this)}
                                       onForward={this.onForward.bind(this)}
                                       rowCount={data.length}
                                       numSelected={selected.length}
                                         currentParentID={this.state.currentParentID}/>
+                <Downloader open={this.state.downloadDialogOpen} onClose={this.handleDownloadDialogClose.bind(this)} list={this.state.downloadList}/>
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table}>
                         <EnhancedTableHead

@@ -32,7 +32,7 @@ class Home extends React.Component {
             <div className={classes.root}>
                 <HomeTree className={classes.tree}/>
                 <div className={classes.main}>
-                    <EnhancedTable />
+                    <EnhancedTable onToast={this.props.onToast}/>
                     <FileDetail/>
                 </div>
             </div>

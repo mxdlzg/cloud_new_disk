@@ -474,7 +474,26 @@ class EnhancedTable extends React.Component {
      * @param id
      */
     handleClick = (event, id) => {
-        //Change effect
+        if (event.target.nodeName==="TD"){
+            //Change effect
+            this.doItemSelect(id);
+
+            //If dir
+            let item = this.state.data.find(item=>{
+                return item.id === id;
+            });
+            if (item.fileType === 'dir') {
+                this.doDirItemClick(item);
+            }
+        }
+    };
+
+
+    /**
+     * Do item selection
+     * @param id
+     */
+    doItemSelect(id){
         const {selected} = this.state;
         const selectedIndex = selected.indexOf(id);
         let newSelected = [];
@@ -492,22 +511,14 @@ class EnhancedTable extends React.Component {
             );
         }
         this.setState({selected: newSelected});
-
-        //If dir
-        let item = this.state.data.find(item=>{
-            return item.id === id;
-        });
-        if (item.fileType === 'dir') {
-            this.handleDirItemClick(item);
-        }
-    };
+    }
 
     /**
      * Handle dir item click event
      * Enter aim dir
      * @param item
      */
-    handleDirItemClick(item){
+    doDirItemClick(item){
         //TODO::当前位置压栈，请求目标dir内的信息，目标dir进栈，清空当前文件夹选中信息,进入目标dir
         //Clear
         this.setState({selected: []});
@@ -524,6 +535,17 @@ class EnhancedTable extends React.Component {
 
             //Request dir info
             this.requestData(item.nodeID);
+        }
+    }
+
+    /**
+     * Handle item checkbox click
+     * @param event
+     * @param id
+     */
+    handleCheckboxChange(event,id){
+        if (event.target.nodeName === "INPUT") {
+            this.doItemSelect(id);
         }
     }
 
@@ -592,6 +614,9 @@ class EnhancedTable extends React.Component {
                                         <TableCell numeric>{n.fileType}</TableCell>
                                         <TableCell numeric>{n.fileSize}</TableCell>
                                         <TableCell numeric>{n.changedTime}</TableCell>
+                                        <TableCell padding="checkbox">
+                                            <Checkbox onClick={event => this.handleCheckboxChange(event, n.id)} checked={isSelected} color="secondary"/>
+                                        </TableCell>
                                     </TableRow>
                                 );
                             })}

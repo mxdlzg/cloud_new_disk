@@ -21,19 +21,31 @@ const styles = theme => ({
 });
 
 class Home extends React.Component {
+    state={
+        fileDetail:undefined
+    };
+
     constructor(props) {
         super(props);
         this.props.handler(true);
     }
 
+    handleFileDetail(detail){
+        this.setState({fileDetail:detail})
+    }
+
     render() {
         const {classes} = this.props;
+        const {fileDetail} = this.state;
+
         return (
             <div className={classes.root}>
                 <HomeTree className={classes.tree}/>
                 <div className={classes.main}>
-                    <EnhancedTable onToast={this.props.onToast}/>
-                    <FileDetail/>
+                    <EnhancedTable onToast={this.props.onToast} onDetail={this.handleFileDetail.bind(this)}/>
+                    {(fileDetail != null && fileDetail!==undefined) && (
+                        <FileDetail fileDetail={fileDetail}/>
+                    )}
                 </div>
             </div>
         );

@@ -77,15 +77,15 @@ class FileDetail extends React.Component {
     };
 
     render() {
-        const {classes} = this.props;
+        const {classes,fileDetail} = this.props;
         const {show} = this.state;
 
         return (
             <Paper className={classes.root} elevation={8}>
                 <div className={classes.title_box}>
-                    <img width={50} height={50} src={"https://material-ui-next.com/static/images/uxceo-128.jpg"}
+                    <img width={50} height={50} src={fileDetail.item.Url}
                          className={classes.flex}/>
-                    <Typography className={classes.title}>文件名称.dot</Typography>
+                    <Typography className={classes.title}>{fileDetail.item.name}</Typography>
                 </div>
                 <Divider/>
                 <div className={classes.detail_box}>
@@ -97,11 +97,11 @@ class FileDetail extends React.Component {
                         <Typography className={classes.fileDetailLabel}>Uploader</Typography>
                     </div>
                     <div className={classes.detailLabelContent}>
-                        <Typography className={classes.fileDetail}>Type</Typography>
-                        <Typography className={classes.fileDetail}>Size</Typography>
-                        <Typography className={classes.fileDetail}>Modified</Typography>
-                        <Typography className={classes.fileDetail}>Created</Typography>
-                        <Typography className={classes.fileDetail}>Uploader</Typography>
+                        <Typography className={classes.fileDetail}>{fileDetail.item.type}</Typography>
+                        <Typography className={classes.fileDetail}>{fileDetail.item.size!==undefined?fileDetail.item.size:"无"}</Typography>
+                        <Typography className={classes.fileDetail}>{fileDetail.item.changed!==null?fileDetail.item.changed:"无"}</Typography>
+                        <Typography className={classes.fileDetail}>{fileDetail.item.created!==null?fileDetail.item.created:"无"}</Typography>
+                        <Typography className={classes.fileDetail}>{fileDetail.item.user}</Typography>
                     </div>
                 </div>
                 <Divider/>
@@ -113,7 +113,7 @@ class FileDetail extends React.Component {
                         <Typography className={classes.fileDetailLabel}>Description</Typography>
                     </div>
                     <div className={classes.detailLabelContent}>
-                        <Typography className={classes.fileDetail}>Mxdlzg</Typography>
+                        <Typography className={classes.fileDetail}>{fileDetail.item.user}</Typography>
                         <Typography className={classes.fileDetail}>This is demo</Typography>
                     </div>
                 </div>

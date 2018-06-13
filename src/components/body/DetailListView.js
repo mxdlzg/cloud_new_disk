@@ -15,15 +15,16 @@ import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import Uploader from './Uploader'
+import InputDialog from './InputDialog'
 import {List as ImList} from 'immutable'
-import { withCookies, Cookies } from 'react-cookie';
+import {withCookies, Cookies} from 'react-cookie';
 
 
 import {
     Avatar,
     Button,
     Checkbox,
-    IconButton, Menu, MenuItem, Table, TableBody,
+    IconButton, LinearProgress, Menu, MenuItem, Table, TableBody,
     TableCell,
     TableHead,
     TablePagination,
@@ -73,9 +74,9 @@ let counter = 0;
  * @param parentPath
  * @returns {{id: number, iconUrl: *, name: *, fileType: *, fileSize: *, changedTime: *}}
  */
-function createData(nodeID,iconUrl, name, fileType, fileSize, changedTime,parentPath) {
+function createData(nodeID, iconUrl, name, fileType, fileSize, changedTime, parentPath) {
     counter += 1;
-    return {id: counter,nodeID, iconUrl, name, fileType, fileSize, changedTime,parentPath};
+    return {id: counter, nodeID, iconUrl, name, fileType, fileSize, changedTime, parentPath};
 }
 
 //List Column Data
@@ -196,10 +197,9 @@ class EnhancedTableToolbar extends React.Component {
         this.setState({anchorEl: event.currentTarget});
     };
 
-    handleClose = () => {
+    handleClose = (callback) => {
         this.setState({anchorEl: null});
     };
-
 
     /**
      * Open uploader dialog
@@ -221,7 +221,10 @@ class EnhancedTableToolbar extends React.Component {
     };
 
     render() {
-        const {onSelectAllClick,onDownloadClick, onRefresh,onBack,onForward, numSelected, rowCount, classes} = this.props;
+        const {
+            onSelectAllClick, onDownloadClick, onCreateDir, onRefresh, onBack, onForward, onRename, onDetail,
+            numSelected, rowCount, classes
+        } = this.props;
         const {anchorEl, allSelected} = this.state;
 
         return (
@@ -231,12 +234,14 @@ class EnhancedTableToolbar extends React.Component {
                     <FileUpload className={classNames(classes.iconSmall)}/>
                     上 传
                 </Button>
-                <Uploader currentParentID={this.props.currentParentID} open={this.state.open} onClose={this.handleDialogClose.bind(this)}/>
-                <Button className={classes.button} variant="raised" size="small" color="secondary">
+                <Uploader currentParentID={this.props.currentParentID} open={this.state.open}
+                          onClose={this.handleDialogClose.bind(this)}/>
+                <Button onClick={onCreateDir} className={classes.button} variant="raised" size="small" color="secondary">
                     <FolderIcon className={classNames(classes.iconSmall)}/>
                     新建文件夹
                 </Button>
-                <Button onClick={onDownloadClick} className={classes.button} variant="raised" size="small" color="secondary">
+                <Button onClick={onDownloadClick} className={classes.button} variant="raised" size="small"
+                        color="secondary">
                     <CloudDownloadIcon className={classNames(classes.iconSmall)}/>
                     下载
                 </Button>
@@ -278,6 +283,13 @@ class EnhancedTableToolbar extends React.Component {
                         <MenuItem onClick={this.handleClose}>删除</MenuItem>
                         <MenuItem onClick={this.handleClose}>移动到</MenuItem>
                         <MenuItem onClick={this.handleClose}>复制到</MenuItem>
+                        {numSelected === 1 && (
+                            <div>
+                                <MenuItem onClick={(e)=>{this.setState({anchorEl:null});onRename()}}>重命名</MenuItem>
+                                <MenuItem onClick={(e)=>{this.setState({anchorEl:null});onDetail()}}>详情</MenuItem>
+                            </div>
+                        )}
+
                     </Menu>
                 </div>
             </Toolbar>
@@ -306,24 +318,25 @@ class EnhancedTable extends React.Component {
             allSelected: true,
             selected: [],
             data: [
-                createData('nd1','https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67,""),
-                createData('nd2','https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67,""),
-                createData('nd3','https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67,""),
-                createData('nd4','https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67,""),
+                createData('nd1', 'https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67, ""),
+                createData('nd2', 'https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67, ""),
+                createData('nd3', 'https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67, ""),
+                createData('nd4', 'https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67, ""),
             ].sort((a, b) => (a.fileType < b.fileType ? -1 : 1)),
             page: 0,
             rowsPerPage: 20,
             rowHeight: 40,
             currentParentID: '',
-            currentParentPath:"",
-            navigationList:new ImList(),
-            downloadDialogOpen:false
+            currentParentPath: "",
+            navigationList: new ImList(),
+            downloadDialogOpen: false,
+            inputDialogOpen: false
         };
     }
 
-    componentWillMount(){
+    componentWillMount() {
         const {cookies} = this.props;
-        this.setState({currentParentID: cookies.get('startID')||''});
+        this.setState({currentParentID: cookies.get('startID') || ''});
     }
 
     componentDidMount() {
@@ -338,14 +351,15 @@ class EnhancedTable extends React.Component {
         if (parentDirID !== '') {
             let item = this.state.data.find(
                 e => {
-                   return e.nodeID === parentDirID;
+                    return e.nodeID === parentDirID;
                 }
             );
             this.setState({
+                refreshing: true,
                 currentParentID: parentDirID,
-                currentParentPath: item==null?'':item.parentPath
+                currentParentPath: item == null ? '' : item.parentPath
             });
-            const parentPath = item==null?'':item.parentPath;
+            const parentPath = item == null ? '' : item.parentPath;
             $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
                 type: "POST",
                 data: {
@@ -361,12 +375,12 @@ class EnhancedTable extends React.Component {
                     if (status && data["type"] === 8) {
                         let newData = data["data"];
                         //Push into stack
-                        if (this.state.navigationList.indexOf(parentDirID)<= -1) {     //If not on back
-                            this.setState({navigationList:this.state.navigationList.push(parentDirID)});
+                        if (this.state.navigationList.indexOf(parentDirID) <= -1) {     //If not on back
+                            this.setState({navigationList: this.state.navigationList.push(parentDirID)});
                         }
                         //Show new data
                         this.resetData(newData);
-                    }else {
+                    } else {
                         alert(JSON.stringify(data));
                     }
                 }.bind(this),
@@ -388,25 +402,28 @@ class EnhancedTable extends React.Component {
      * Reset this.state.data
      * @param data
      */
-    resetData(data){
+    resetData(data) {
         // if (data.length === 0) {
         //     return;
         // }
         counter = 0;
         let tmpData = [];
-        data.map((item,i)=>{
-            tmpData.push(createData(item['nodeID'],"https://cloud.mxdlzg.com/img/icon/"+item['type']+".png",item['name'],item['type'],0,'',item['parentPath']));
+        data.map((item, i) => {
+            tmpData.push(createData(item['nodeID'], "https://cloud.mxdlzg.com/img/icon/" + item['type'] + ".png", item['name'], item['type'], 0, '', item['parentPath']));
         });
-        this.setState({data:tmpData.sort((a, b) => (a.fileType < b.fileType ? -1 : 1))});
+        this.setState({
+            data: tmpData.sort((a, b) => (a.fileType < b.fileType ? -1 : 1)),
+            refreshing: false,
+        });
     }
 
     /**
      * Back to last dir
      */
-    onBack(){
+    onBack() {
         //last nodeIDi
-        let nextIndex = this.state.navigationList.indexOf(this.state.currentParentID)-1;
-        if (nextIndex>=0){
+        let nextIndex = this.state.navigationList.indexOf(this.state.currentParentID) - 1;
+        if (nextIndex >= 0) {
             let nodeID = this.state.navigationList.get(nextIndex);
 
             if (nodeID !== null) {
@@ -419,21 +436,185 @@ class EnhancedTable extends React.Component {
     /**
      * Enter next dir
      */
-    onForward(){
+    onForward() {
         //TODO::导航栈内，back之后返回peek-1位置的dir，
         //TODO::但是不删除current,如果在peek-1位置进入了另外的文件夹则pop掉peek-1之后的所有(包括current)
 
-        let nextIndex = this.state.navigationList.indexOf(this.state.currentParentID)+1;
-        if (nextIndex>=0){
+        let nextIndex = this.state.navigationList.indexOf(this.state.currentParentID) + 1;
+        if (nextIndex >= 0) {
             this.forward(nextIndex);
         }
     }
-    forward(nextIndex){
+    /**
+     * Do forward
+     * @param nextIndex
+     */
+    forward(nextIndex) {
         let nodeID = this.state.navigationList.get(nextIndex);
 
-        if (nodeID !== null) {
+        if (nodeID !== undefined) {
             this.requestData(nodeID);
         }
+    }
+
+    /**
+     * On item rename
+     */
+    onRename() {
+        let id = this.state.selected[0];
+        let item = this.state.data.find(item => {
+            return item.id === id;
+        });
+        const data = {
+            cases: "Rename",
+            item: item,
+            title: "重命名 (Rename)",
+            msg: "请输入新的文件名称"
+        };
+        this.setState({
+            inputDialogData: data,
+            inputDialogOpen: !this.state.inputDialogOpen
+        })
+    }
+    doRename(data) {
+        $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
+            type: "POST",
+            data: {
+                clientType: "rename",
+                data: {
+                    nodeID: data.item.nodeID,
+                    fileType: data.item.fileType,
+                    newName: data.content
+                }
+            },
+            dataType: "json",
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function (data, status) {
+                if (status && data["status"] === 11) {
+                    //Show new data
+                    this.refresh();
+                } else {
+                    this.props.onToast(data["msg"]);
+                }
+            }.bind(this),
+            error: function (msg) {
+                alert(JSON.stringify(msg));
+            }
+        });
+    }
+
+    /**
+     * Create dir
+     */
+    onCreateDir(){
+        let id = this.state.currentParentID;
+        let item = this.state.data.find(item => {
+            return item.id === id;
+        });
+        const data = {
+            cases: "CreateDir",
+            item: item!==undefined?item:{nodeID:id},
+            title: "新建文件夹 (Create Directory)",
+            msg: "请输入文件夹名称"
+        };
+        this.setState({
+            inputDialogData: data,
+            inputDialogOpen: !this.state.inputDialogOpen
+        })
+    }
+    doCreateDir(data){
+        const {cookies} = this.props;
+        $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
+            type: "POST",
+            data: {
+                clientType: "createDir",
+                data: {
+                    nodeID: data.item.nodeID,
+                    userID: cookies.get("userID")||'',
+                    newName: data.content
+                }
+            },
+            dataType: "json",
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function (data, status) {
+                if (status && data["status"] === 11) {
+                    //Show new data
+                    this.refresh();
+                } else {
+                    this.props.onToast(data["msg"]);
+                }
+            }.bind(this),
+            error: function (msg) {
+                alert(JSON.stringify(msg));
+            }
+        });
+    }
+
+    /**
+     * On item detail
+     */
+    onDetail() {
+        let id = this.state.selected[0];
+        let item = this.state.data.find(item => {
+            return item.id === id;
+        });
+
+        this.setState({
+            refreshing:!this.state.refreshing
+        },()=>{
+            $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
+                type: "POST",
+                data: {
+                    clientType: "detail",
+                    data: {
+                        nodeID: item.nodeID,
+                        fileType: item.fileType
+                    }
+                },
+                dataType: "json",
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function (data, status) {
+                    if (status && data["status"] === 11) {
+                        this.setState({
+                            refreshing:!this.state.refreshing
+                        });
+                        data["data"][0].Url = item.iconUrl;
+                        this.props.onDetail({item:data["data"][0]});
+                    } else {
+                        this.props.onToast(data["msg"]);
+                    }
+                }.bind(this),
+                error: function (msg) {
+                    alert(JSON.stringify(msg));
+                }
+            });
+        });
+
+    }
+
+    onInputDialogClose(data) {
+        this.setState({
+            inputDialogData: undefined,
+            inputDialogContent: data.content,
+            inputDialogOpen: !this.state.inputDialogOpen
+        }, () => {
+            if (data.content) {
+                switch (data.cases) {
+                    case "Rename":
+                        this.doRename(data);
+                        break;
+                    case "CreateDir":
+                        this.doCreateDir(data);
+                        break;
+                }
+            }
+        })
     }
 
     /**
@@ -486,12 +667,12 @@ class EnhancedTable extends React.Component {
      * @param id
      */
     handleClick = (event, id) => {
-        if (event.target.nodeName==="TD"){
+        if (event.target.nodeName === "TD") {
             //Change effect
             this.doItemSelect(id);
 
             //If dir
-            let item = this.state.data.find(item=>{
+            let item = this.state.data.find(item => {
                 return item.id === id;
             });
             if (item.fileType === 'dir') {
@@ -500,12 +681,11 @@ class EnhancedTable extends React.Component {
         }
     };
 
-
     /**
      * Do item selection
      * @param id
      */
-    doItemSelect(id){
+    doItemSelect(id) {
         const {selected} = this.state;
         const selectedIndex = selected.indexOf(id);
         let newSelected = [];
@@ -530,7 +710,7 @@ class EnhancedTable extends React.Component {
      * Enter aim dir
      * @param item
      */
-    doDirItemClick(item){
+    doDirItemClick(item) {
         //TODO::当前位置压栈，请求目标dir内的信息，目标dir进栈，清空当前文件夹选中信息,进入目标dir
         //Clear
         this.setState({selected: []});
@@ -540,10 +720,10 @@ class EnhancedTable extends React.Component {
         let index = this.state.navigationList.indexOf(item.nodeID);
         if (index > -1) {   //If aim dir existed in history
             this.forward(index);
-        }else {
+        } else {
             //Clear history which behind this nodeID
             let index = this.state.navigationList.indexOf(this.state.currentParentID);  //当前dir可能在history内不是last
-            this.setState({navigationList:this.state.navigationList.slice(0,index+1)});
+            this.setState({navigationList: this.state.navigationList.slice(0, index + 1)});
 
             //Request dir info
             this.requestData(item.nodeID);
@@ -555,7 +735,7 @@ class EnhancedTable extends React.Component {
      * @param event
      * @param id
      */
-    handleCheckboxChange(event,id){
+    handleCheckboxChange(event, id) {
         if (event.target.nodeName === "INPUT") {
             this.doItemSelect(id);
         }
@@ -565,18 +745,18 @@ class EnhancedTable extends React.Component {
      * Handle download button click event
      * @param event
      */
-    handleDownloadClick(event){
+    handleDownloadClick(event) {
         if (this.state.selected.length > 0) {
             const selected = this.state.selected;
-            const downloadList = this.state.data.filter((e)=>{
-                return selected.indexOf(e.id)>=0;
+            const downloadList = this.state.data.filter((e) => {
+                return selected.indexOf(e.id) >= 0;
             });
-            
+
             this.setState({
-                downloadList:downloadList,
-                downloadDialogOpen:!this.state.downloadDialogOpen,
+                downloadList: downloadList,
+                downloadDialogOpen: !this.state.downloadDialogOpen,
             })
-        }else {
+        } else {
             this.props.onToast("请选择需要下载的文件")
         }
     }
@@ -584,10 +764,10 @@ class EnhancedTable extends React.Component {
     /**
      * Handle download dialog close event
      */
-    handleDownloadDialogClose(){
+    handleDownloadDialogClose() {
         this.setState({
-            downloadList:undefined,
-            downloadDialogOpen:!this.state.downloadDialogOpen,
+            downloadList: undefined,
+            downloadDialogOpen: !this.state.downloadDialogOpen,
         })
     }
 
@@ -612,7 +792,7 @@ class EnhancedTable extends React.Component {
 
     render() {
         const {classes} = this.props;
-        const {data, order, orderBy, selected, page, rowHeight} = this.state;
+        const {data, order, orderBy, selected, page, rowHeight, refreshing} = this.state;
         let rowsPerPage = data.length;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
@@ -620,13 +800,22 @@ class EnhancedTable extends React.Component {
             <Paper className={classes.root} elevation={6}>
                 <EnhancedTableToolbar onSelectAllClick={this.handleSelectAll}
                                       onDownloadClick={this.handleDownloadClick.bind(this)}
+                                      onCreateDir={this.onCreateDir.bind(this)}
                                       onRefresh={this.refresh.bind(this)}
                                       onBack={this.onBack.bind(this)}
                                       onForward={this.onForward.bind(this)}
+                                      onRename={this.onRename.bind(this)}
+                                      onDetail={this.onDetail.bind(this)}
                                       rowCount={data.length}
                                       numSelected={selected.length}
-                                        currentParentID={this.state.currentParentID}/>
-                <Downloader open={this.state.downloadDialogOpen} onClose={this.handleDownloadDialogClose.bind(this)} list={this.state.downloadList}/>
+                                      currentParentID={this.state.currentParentID}/>
+                <Downloader open={this.state.downloadDialogOpen} onClose={this.handleDownloadDialogClose.bind(this)}
+                            list={this.state.downloadList}/>
+                <InputDialog open={this.state.inputDialogOpen} data={this.state.inputDialogData}
+                             onClose={this.onInputDialogClose.bind(this)}/>
+                {refreshing && (
+                    <LinearProgress color="secondary"/>
+                )}
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table}>
                         <EnhancedTableHead
@@ -659,7 +848,8 @@ class EnhancedTable extends React.Component {
                                         <TableCell numeric>{n.fileSize}</TableCell>
                                         <TableCell numeric>{n.changedTime}</TableCell>
                                         <TableCell padding="checkbox">
-                                            <Checkbox onClick={event => this.handleCheckboxChange(event, n.id)} checked={isSelected} color="secondary"/>
+                                            <Checkbox onClick={event => this.handleCheckboxChange(event, n.id)}
+                                                      checked={isSelected} color="secondary"/>
                                         </TableCell>
                                     </TableRow>
                                 );

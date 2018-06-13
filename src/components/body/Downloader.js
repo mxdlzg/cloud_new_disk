@@ -11,6 +11,8 @@ import {
 import {withCookies} from "react-cookie";
 import {withStyles} from "material-ui/styles/index";
 import $ from "jquery";
+import List from "../learnredux/List";
+import {Link} from "react-router-dom";
 
 const styles = theme => ({
     downloadDialog: {
@@ -19,22 +21,42 @@ const styles = theme => ({
     }
 });
 
-class Downloader extends React.Component{
+class Downloader extends React.Component {
+    state = {
+        downloading: true,
+        msg: "正在获取下载链接....",
+        open:false,
+        haveDownload:false,
+        list:undefined
+    };
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.list != null) {
-            return true;
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (nextProps.list !== this.state.list) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
+    componentWillReceiveProps(nextProps,nextContext){
+        if (this.state.list !== nextProps.list) {
+            this.setState({
+                list:nextProps.list,
+                open:nextProps.open
+            })
         }
-        return false;
     }
 
+    componentDidUpdate() {
+        const {haveDownload,list,open} = this.state;
+        console.log("update:"+haveDownload+" "+open+"\n"+list);
+        if (!haveDownload && open) {
+            this.doDownload(list);
+        }
+    }
 
-    componentDidUpdate(){
-        const {list} = this.props;
-        if (list != null && this.props.open) {
+    doDownload(list){
+        if (list) {
             const formatData = this.formatData(list);
-
-            $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php?XDEBUG_SESSION_START=17503",{
+            $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php?XDEBUG_SESSION_START=17503", {
                 type: "POST",
                 data: {
                     clientType: "download",
@@ -42,26 +64,45 @@ class Downloader extends React.Component{
                         data:formatData,
                     },
                 },
-                dataType:"json",
+                dataType: "json",
                 xhrFields: {
                     withCredentials: true
                 },
-                success:function (data,status) {
+                success: function (data, status) {
                     if (status) {
                         let rst = data;
-                        switch (rst.status){
+                        switch (rst.status) {
                             case 4:
-                                window.open(rst.data);
+                                this.setState({
+                                    responseData: rst,
+                                    haveDownload: true,
+                                    success: true,
+                                    msg: "链接已获取，如浏览器无响应，请点击上方下载链接("+rst.msg+")"
+                                });
+                                window.open(rst.data, '_blank');
                                 break;
                             case 3:
-                                this.props.onToast(rst.msg);
+                                this.setState({
+                                    haveDownload: true,
+                                    success: false,
+                                    msg: rst.msg
+                                });
                                 break;
                         }
                     } else {
-                        this.props.onToast("请求失败");
+                        this.setState({
+                            haveDownload: true,
+                            success: false,
+                            msg: "请求失败"
+                        });
                     }
                 }.bind(this),
-                error:function (msg) {
+                error: function (msg) {
+                    this.setState({
+                        haveDownload: true,
+                        success: false,
+                        msg: "请求失败"
+                    });
                     alert(JSON.stringify(msg));
                 }
             });
@@ -69,23 +110,23 @@ class Downloader extends React.Component{
     }
 
     formatData(list) {
-        const data = {files:[],dirs:[]};
-        list.map((item,i)=>{
-            if (item.fileType == "dir"){
+        const data = {files: [], dirs: []};
+        list.map((item, i) => {
+            if (item.fileType == "dir") {
                 data.dirs.push({
-                    id:item.id,
-                    nodeID:item.nodeID,
-                    name:item.name,
-                    fileType:"dir",
-                    parentPath:item.parentPath
+                    id: item.id,
+                    nodeID: item.nodeID,
+                    name: item.name,
+                    fileType: "dir",
+                    parentPath: item.parentPath
                 })
-            }else {
+            } else {
                 data.files.push({
-                    id:item.id,
-                    nodeID:item.nodeID,
-                    name:item.name,
-                    fileType:item.fileType,
-                    parentPath:item.parentPath
+                    id: item.id,
+                    nodeID: item.nodeID,
+                    name: item.name,
+                    fileType: item.fileType,
+                    parentPath: item.parentPath
                 })
             }
         });
@@ -96,12 +137,20 @@ class Downloader extends React.Component{
 
     };
     handleClose = (e) => {
+        this.setState({
+            downloading: true,
+            msg: "正在获取下载链接....",
+            open:false,
+            haveDownload:false
+        });
         this.props.onClose();
     };
 
-    render(){
+    render() {
         const {classes} = this.props;
-        return(
+        const {haveDownload, responseData, msg, success} = this.state;
+
+        return (
             <div>
                 <Dialog
                     open={this.props.open}
@@ -110,14 +159,35 @@ class Downloader extends React.Component{
                     disableBackdropClick={false}
                     maxWidth={false}
                 >
-                    <DialogTitle id="form-dialog-title">下载(Download)</DialogTitle>
+                    <DialogTitle id="form-dialog-title">下载 (Download)</DialogTitle>
                     <DialogContent className={classes.downloadDialog}>
-                        <LinearProgress color="secondary" />
-                        <DialogContentText id="alert-dialog-description">
-                            <br/>
-                            正在获取下载链接....
-                            <br/>
-                        </DialogContentText>
+                        {!haveDownload ? (
+                            <div>
+                                <LinearProgress color="secondary"/>
+                                <DialogContentText id="alert-dialog-description">
+                                    <br/>
+                                    {msg}
+                                    <br/>
+                                </DialogContentText>
+                            </div>
+                        ) : (
+                            <div>
+                                {success && (
+                                    <Link to="route"
+                                          onClick={(event) => {
+                                              event.preventDefault();
+                                              window.open(responseData.data, '_blank');
+                                          }}>
+                                        点击下载
+                                    </Link>
+                                )}
+                                <DialogContentText id="alert-dialog-description">
+                                    <br/>
+                                    {msg}
+                                    <br/>
+                                </DialogContentText>
+                            </div>
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handlePositive} color="secondary">

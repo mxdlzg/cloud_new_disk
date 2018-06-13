@@ -586,6 +586,7 @@ class EnhancedTable extends React.Component {
      */
     handleDownloadDialogClose(){
         this.setState({
+            downloadList:undefined,
             downloadDialogOpen:!this.state.downloadDialogOpen,
         })
     }

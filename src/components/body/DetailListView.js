@@ -37,6 +37,8 @@ import {FileUpload} from "@material-ui/icons/es/index";
 import {Stack} from "immutable";
 import List from "../learnredux/List";
 import Downloader from "./Downloader";
+import ToastDialog from "./ToastDialog";
+import MoveDialog from "./MoveDialog";
 
 const styles = theme => ({
     root: {
@@ -222,7 +224,7 @@ class EnhancedTableToolbar extends React.Component {
 
     render() {
         const {
-            onSelectAllClick, onDownloadClick, onCreateDir, onRefresh, onBack, onForward, onRename, onDetail,
+            onSelectAllClick, onDownloadClick, onCreateDir, onRefresh, onBack, onForward, onRename, onDetail, onDelete, onMove,
             numSelected, rowCount, classes
         } = this.props;
         const {anchorEl, allSelected} = this.state;
@@ -236,7 +238,8 @@ class EnhancedTableToolbar extends React.Component {
                 </Button>
                 <Uploader currentParentID={this.props.currentParentID} open={this.state.open}
                           onClose={this.handleDialogClose.bind(this)}/>
-                <Button onClick={onCreateDir} className={classes.button} variant="raised" size="small" color="secondary">
+                <Button onClick={onCreateDir} className={classes.button} variant="raised" size="small"
+                        color="secondary">
                     <FolderIcon className={classNames(classes.iconSmall)}/>
                     新建文件夹
                 </Button>
@@ -280,13 +283,28 @@ class EnhancedTableToolbar extends React.Component {
                         open={Boolean(anchorEl)}
                         onClose={this.handleClose}
                     >
-                        <MenuItem onClick={this.handleClose}>删除</MenuItem>
-                        <MenuItem onClick={this.handleClose}>移动到</MenuItem>
-                        <MenuItem onClick={this.handleClose}>复制到</MenuItem>
+                        <MenuItem onClick={(e) => {
+                            this.setState({anchorEl: null});
+                            onDelete()
+                        }}>删除</MenuItem>
+                        <MenuItem onClick={(e) => {
+                            this.setState({anchorEl: null});
+                            onMove(false)
+                        }}>移动到</MenuItem>
+                        <MenuItem onClick={(e) => {
+                            this.setState({anchorEl: null});
+                            onMove(true)
+                        }}>复制到</MenuItem>
                         {numSelected === 1 && (
                             <div>
-                                <MenuItem onClick={(e)=>{this.setState({anchorEl:null});onRename()}}>重命名</MenuItem>
-                                <MenuItem onClick={(e)=>{this.setState({anchorEl:null});onDetail()}}>详情</MenuItem>
+                                <MenuItem onClick={(e) => {
+                                    this.setState({anchorEl: null});
+                                    onRename()
+                                }}>重命名</MenuItem>
+                                <MenuItem onClick={(e) => {
+                                    this.setState({anchorEl: null});
+                                    onDetail()
+                                }}>详情</MenuItem>
                             </div>
                         )}
 
@@ -330,7 +348,9 @@ class EnhancedTable extends React.Component {
             currentParentPath: "",
             navigationList: new ImList(),
             downloadDialogOpen: false,
-            inputDialogOpen: false
+            inputDialogOpen: false,
+            toastDialogOpen: false,
+            moveDialogOpen: false
         };
     }
 
@@ -445,6 +465,7 @@ class EnhancedTable extends React.Component {
             this.forward(nextIndex);
         }
     }
+
     /**
      * Do forward
      * @param nextIndex
@@ -456,6 +477,143 @@ class EnhancedTable extends React.Component {
             this.requestData(nodeID);
         }
     }
+
+    /**
+     * On delete items
+     */
+    onDelete() {
+        const selected = this.state.selected;
+        const selectedList = this.state.data.filter((e) => {
+            return selected.indexOf(e.id) >= 0;
+        });
+
+        this.setState({
+            toastDialogData: {
+                item: selectedList,
+                cases: "Delete",
+                title: "删除 (Delete)",
+                msg: "是否执行删除？"
+            },
+            toastDialogOpen: !this.state.toastDialogOpen,
+        })
+    }
+
+    doDelete(data) {
+        let list = data.item;
+        $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
+            type: "POST",
+            data: {
+                clientType: "delete",
+                data: {
+                    parentNodeID: this.state.currentParentID,
+                    data: list,
+                }
+            },
+            dataType: "json",
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function (data, status) {
+                if (status && data["status"] === 11) {
+                    //Show new data
+                    this.refresh();
+                } else {
+                    this.props.onToast(data["msg"]);
+                }
+            }.bind(this),
+            error: function (msg) {
+                alert(JSON.stringify(msg));
+            }
+        });
+    }
+
+    formatData(list) {
+        const data = {files: [], dirs: []};
+        list.map((item, i) => {
+            if (item.fileType == "dir") {
+                data.dirs.push({
+                    id: item.id,
+                    nodeID: item.nodeID,
+                    name: item.name,
+                    fileType: "dir",
+                    parentPath: item.parentPath
+                })
+            } else {
+                data.files.push({
+                    id: item.id,
+                    nodeID: item.nodeID,
+                    name: item.name,
+                    fileType: item.fileType,
+                    parentPath: item.parentPath
+                })
+            }
+        });
+        return data;
+    }
+
+    onToastDialogClose(data) {
+        this.setState({
+            toastDialogData: undefined,
+            toastDialogOpen: !this.state.toastDialogOpen
+        }, () => {
+            if (data) {
+                switch (data.cases) {
+                    case "Delete":
+                        this.doDelete(data);
+                        break;
+                }
+            }
+        })
+
+    }
+
+    /**
+     * Move file
+     * @param duplicate ,move or copy
+     */
+    onMove(duplicate) {
+        const selected = this.state.selected;
+        const selectedList = this.state.data.filter((e) => {
+            return selected.indexOf(e.id) >= 0;
+        });
+
+        this.setState({
+            moveDialogData: {
+                item: {list:selectedList,duplicate:duplicate} ,
+                cases: duplicate ? "Copy" : "Move",
+                title: duplicate ? "复制到 (Copy)" : "移动到 (Move)",
+                msg: "请选择文件夹"
+            },
+            moveDialogOpen: true,
+        })
+    }
+    doMove(data){
+        if (data.item.duplicate) {
+            console.log(data.item.aimNodeID)
+        } else {
+
+        }
+    }
+
+    onMoveDialogClose(data) {
+        this.setState({
+            moveDialogData: undefined,
+            moveDialogOpen: !this.state.toastDialogOpen})
+        // }, () => {
+        //     if (data.success) {
+        //         switch (data.cases) {
+        //             case "Move":
+        //             case "Copy":
+        //                 this.doMove(data);
+        //                 break;
+        //         }
+        //     }
+        // })
+        if (data) {
+
+        }
+    }
+
 
     /**
      * On item rename
@@ -476,6 +634,7 @@ class EnhancedTable extends React.Component {
             inputDialogOpen: !this.state.inputDialogOpen
         })
     }
+
     doRename(data) {
         $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
             type: "POST",
@@ -508,14 +667,14 @@ class EnhancedTable extends React.Component {
     /**
      * Create dir
      */
-    onCreateDir(){
+    onCreateDir() {
         let id = this.state.currentParentID;
         let item = this.state.data.find(item => {
             return item.id === id;
         });
         const data = {
             cases: "CreateDir",
-            item: item!==undefined?item:{nodeID:id},
+            item: item !== undefined ? item : {nodeID: id},
             title: "新建文件夹 (Create Directory)",
             msg: "请输入文件夹名称"
         };
@@ -524,7 +683,8 @@ class EnhancedTable extends React.Component {
             inputDialogOpen: !this.state.inputDialogOpen
         })
     }
-    doCreateDir(data){
+
+    doCreateDir(data) {
         const {cookies} = this.props;
         $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
             type: "POST",
@@ -532,7 +692,7 @@ class EnhancedTable extends React.Component {
                 clientType: "createDir",
                 data: {
                     nodeID: data.item.nodeID,
-                    userID: cookies.get("userID")||'',
+                    userID: cookies.get("userID") || '',
                     newName: data.content
                 }
             },
@@ -564,8 +724,8 @@ class EnhancedTable extends React.Component {
         });
 
         this.setState({
-            refreshing:!this.state.refreshing
-        },()=>{
+            refreshing: !this.state.refreshing
+        }, () => {
             $.ajax("http://localhost/CloudDiskServer/ServerOP/StartListener.php", {
                 type: "POST",
                 data: {
@@ -582,10 +742,10 @@ class EnhancedTable extends React.Component {
                 success: function (data, status) {
                     if (status && data["status"] === 11) {
                         this.setState({
-                            refreshing:!this.state.refreshing
+                            refreshing: !this.state.refreshing
                         });
                         data["data"][0].Url = item.iconUrl;
-                        this.props.onDetail({item:data["data"][0]});
+                        this.props.onDetail({item: data["data"][0]});
                     } else {
                         this.props.onToast(data["msg"]);
                     }
@@ -804,6 +964,8 @@ class EnhancedTable extends React.Component {
                                       onRefresh={this.refresh.bind(this)}
                                       onBack={this.onBack.bind(this)}
                                       onForward={this.onForward.bind(this)}
+                                      onDelete={this.onDelete.bind(this)}
+                                      onMove={this.onMove.bind(this)}
                                       onRename={this.onRename.bind(this)}
                                       onDetail={this.onDetail.bind(this)}
                                       rowCount={data.length}
@@ -813,6 +975,10 @@ class EnhancedTable extends React.Component {
                             list={this.state.downloadList}/>
                 <InputDialog open={this.state.inputDialogOpen} data={this.state.inputDialogData}
                              onClose={this.onInputDialogClose.bind(this)}/>
+                <ToastDialog open={this.state.toastDialogOpen} data={this.state.toastDialogData}
+                             onClose={this.onToastDialogClose.bind(this)}/>
+                <MoveDialog open={this.state.moveDialogOpen} data={this.state.moveDialogData}
+                             onClose={this.onMoveDialogClose.bind(this)}/>
                 {refreshing && (
                     <LinearProgress color="secondary"/>
                 )}

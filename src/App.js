@@ -31,6 +31,9 @@ const theme = createMuiTheme({
         status: {
             danger: 'orange',
         },
+        common:{
+            white:'#fff'
+        }
     },
 });
 

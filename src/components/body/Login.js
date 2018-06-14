@@ -167,7 +167,12 @@ class Login extends React.Component {
                             />
                         </FormControl>
                     </div>
+                    <br/>
                     <Button className="Login-button" onClick={this.handleLogin}>登录</Button>
+                    <span/>
+                    <Link to={'/register'}>
+                        注册
+                    </Link>
                 </Paper>
             </div>
         );

@@ -84,14 +84,14 @@ class MoveDialog extends React.Component {
                 if (status && data['status'] == 11) {
                     //let newData = data["data"];
                     //Show new data
-                    this.props.onClose(true);
+                    this.props.onClose(true,data['msg']);
                 } else {
                     alert(JSON.stringify(data));
                 }
             }.bind(this),
             error: function (msg,data) {
                 alert(JSON.stringify(msg));
-                this.props.onClose(false);
+                this.props.onClose(false,'移动失败');
             }.bind(this)
         });
 

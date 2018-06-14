@@ -5,6 +5,7 @@ import Login from "./Login";
 import Home from "./Home";
 import User from "./User"
 import Uploader from "./Uploader";
+import Register from './Register'
 import {PropsRoute, PublicRoute, PrivateRoute} from 'react-router-with-props';
 
 class Main extends React.Component {
@@ -17,6 +18,7 @@ class Main extends React.Component {
                 <Route path='/detail' component={Detail}/>
                 <Route path='/user' component={User}/>
                 <Route path='/uploader' component={Uploader}/>
+                <PropsRoute path='/register' component={Register} onToast={this.props.onToast}/>
             </Switch>
         );
     }

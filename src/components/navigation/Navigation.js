@@ -165,6 +165,7 @@ class Navigation extends Component {
                     if (rst["type"] === 3) {
                         switch (rst["status"]) {
                             case 8:
+                                //this.handleSnackOpen(rst["msg"]);
                                 this.props.history.push('/');
                                 break;
                             case 9:
@@ -179,6 +180,9 @@ class Navigation extends Component {
                                 this.props.history.push('/');
                                 break;
                         }
+                    }else {
+                        this.handleSnackOpen(rst["msg"]);
+                        this.props.history.push('/');
                     }
                 } else {
                     this.handleSnackOpen("注销请求失败");

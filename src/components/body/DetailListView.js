@@ -39,6 +39,7 @@ import List from "../learnredux/List";
 import Downloader from "./Downloader";
 import ToastDialog from "./ToastDialog";
 import MoveDialog from "./MoveDialog";
+import {withRouter} from "react-router-dom";
 
 const styles = theme => ({
     root: {
@@ -336,10 +337,10 @@ class EnhancedTable extends React.Component {
             allSelected: true,
             selected: [],
             data: [
-                createData('nd1', 'https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67, ""),
-                createData('nd2', 'https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67, ""),
-                createData('nd3', 'https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67, ""),
-                createData('nd4', 'https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67, ""),
+                // createData('nd1', 'https://cloud.mxdlzg.com/img/icon/json.png', 'Cupcake', 305, 3.7, 67, ""),
+                // createData('nd2', 'https://cloud.mxdlzg.com/img/icon/pdf.png', 'Cupcake', 305, 3.7, 67, ""),
+                // createData('nd3', 'https://cloud.mxdlzg.com/img/icon/doc.png', 'Cupcake', 305, 3.7, 67, ""),
+                // createData('nd4', 'https://cloud.mxdlzg.com/img/icon/png.png', 'Cupcake', 305, 3.7, 67, ""),
             ].sort((a, b) => (a.fileType < b.fileType ? -1 : 1)),
             page: 0,
             rowsPerPage: 20,
@@ -400,7 +401,10 @@ class EnhancedTable extends React.Component {
                         }
                         //Show new data
                         this.resetData(newData);
-                    } else {
+                    } else if (data["status"] === 2) {
+                        this.props.onToast(data["msg"]);
+                        this.props.history.push('/');
+                    }else {
                         alert(JSON.stringify(data));
                     }
                 }.bind(this),
@@ -595,7 +599,7 @@ class EnhancedTable extends React.Component {
         }
     }
 
-    onMoveDialogClose(data) {
+    onMoveDialogClose(data,msg) {
         this.setState({
             moveDialogData: undefined,
             moveDialogOpen: !this.state.toastDialogOpen})
@@ -609,9 +613,8 @@ class EnhancedTable extends React.Component {
         //         }
         //     }
         // })
-        if (data) {
-
-        }
+        this.props.onToast(msg);
+        this.refresh();
     }
 
 
@@ -1051,4 +1054,4 @@ EnhancedTable.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withCookies(withStyles(styles)(EnhancedTable));
+export default withRouter(withCookies(withStyles(styles)(EnhancedTable)));
